@@ -12,67 +12,113 @@ The frontend and backend communicate through a RESTful API.
        Payload-out-on-failure
 ```
 
-## Add Category
+## Add Category - Sam
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/addCategory
+POST
+{
+   "name": "Appliances"
+}
     200:
-       Payload-out-on-success
+    {
+      "name": "Appliances",
+      "message": "Catagory successfully added"
+    }
     400:
-       Payload-out-on-failure
+    {
+      "error": "Catagory name can't be an empty string"
+    }
+   
 ```
 
-## Remove Category
+## Remove Category - Sam
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/removeCategory
+POST
+{
+   "name": "Appliances"
+}
     200:
-       Payload-out-on-success
+    {
+      "name": "Appliances",
+      "message": "Catagory successfully removed"
+    }
     400:
-       Payload-out-on-failure
+    {
+      "error": "Catagory not found"
+    }
+    
 ```
 
-## Upload Category Items
+## Upload Category Items - Sam
 
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/uploadCategoryItems
+POST
+{
+   "Category": "Furniture",
+   "Name": "Chair"
+   "lowPrice": 10,
+   "highPrice": 30
+}
     200:
-       Payload-out-on-success
+       {
+         "Name": "Chair"
+         "Message": "Item successfully added"
+
+       }
     400:
-       Payload-out-on-failure
+    {
+      "error": "Category for this item does not exist yet"
+    }
 ```
 
-## Remove Category Item
+## Remove Category Item - Sam
 
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/removeCategoryItem
+POST
+{
+   "Category": "Furniture",
+   "Name": "Chair"
+   "lowPrice": 10,
+   "highPrice": 30
+}
     200:
-       Payload-out-on-success
+       {
+         "Name": "Chair"
+         "Message": "Item successfully removed"
+
+       }
     400:
-       Payload-out-on-failure
+    {
+      "error": "Category for this item does not exist"
+    }
 ```
 
-## Edit Category Item
-
-
+## Edit Category Item - Sam
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
-    200:
-       Payload-out-on-success
-    400:
-       Payload-out-on-failure
+/editCategoryItem
+PUT
+{
+  "category": "Furniture",
+  "originalName": "Chair",
+  "name": "Office Chair",
+  "lowPrice": 15,
+  "highPrice": 40
+}
+   200:
+      {
+      "message": "Category item successfully updated"
+      }    
+   400:
+      {
+      "error": "Low price cannot exceed high price"
+      }
 ```
 
 ## List DonationCenters
