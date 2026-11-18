@@ -17,12 +17,23 @@ The frontend and backend communicate through a RESTful API.
 ```
 /login
   POST
-  { "user": "string", "password": "string" }
+    {
+        "user": "superUniqueUserName",
+        "password": "password123"
+    }
     200:
-        { "token": "unique-auth-token", "user": "string", "accountType": "string" }
+        {
+            "token": "token-123-456-789",
+            "user": "superUniqueUserName",
+            "accountType": "organization" | "donationCenter" | "admin"
+        }
     400:
-        { "error": "user does not exist" }
-        { "error": "invalid user/password combo" }
+        {
+            "error": "user does not exist"
+        }
+        {
+            "error": "invalid user/password combo"
+        }
 ```
 
 `accountType` can be one of the following: `organization`, `donationCenter`, `admin`.
@@ -33,14 +44,28 @@ The view and functionality of the frontend will be determined by the `accountTyp
 ```
 /changePassword
   POST
-  { "user": "string", "oldPassword": "string", "newPassword": "string" }
+    {
+        "user": "superUniqueUserName",
+        "oldPassword": "password123",
+        "newPassword": "superSecurePassword456"
+    }
     200:
-        { "message": "password changed successfully" }
+        {
+            "message": "password changed successfully"
+        }
     400:
-        { "error": "user does not exist" }
-        { "error": "invalid user/password combo" }
-        { "error": "new password cannot be empty" }
-        { "error": "new password cannot" }
+        {
+            "error": "user does not exist"
+        }
+        {
+            "error": "invalid user/password combo"
+        }
+        {
+            "error": "new password cannot be empty"
+        }
+        {
+            "error": "new password cannot be the same as the old password"
+        }
 ```
 
 ## Add Category
@@ -139,12 +164,23 @@ Syntax same as Login Organization.
 ```
 /login
   POST
-  { "user": "string", "password": "string" }
+    {
+        "user": "superUniqueUserName",
+        "password": "password123"
+    }
     200:
-        { "token": "unique-auth-token", "user": "string", "accountType": "string" }
+        {
+            "token": "token-123-456-789",
+            "user": "superUniqueUserName",
+            "accountType": "organization" | "donationCenter" | "admin"
+        }
     400:
-        { "error": "user does not exist" }
-        { "error": "invalid user/password combo" }
+        {
+            "error": "user does not exist"
+        }
+        {
+            "error": "invalid user/password combo"
+        }
 ```
 
 `accountType` can be one of the following: `organization`, `donationCenter`, `admin`.
