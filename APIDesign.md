@@ -15,7 +15,7 @@ The frontend and backend communicate through a RESTful API.
 ## Login Organization
 
 ```
-/login
+/loginOrganization
   POST
     {
         "user": "superUniqueUserName",
@@ -25,7 +25,6 @@ The frontend and backend communicate through a RESTful API.
         {
             "token": "token-123-456-789",
             "user": "superUniqueUserName",
-            "accountType": "organization" | "donationCenter" | "admin"
         }
     400:
         {
@@ -35,9 +34,6 @@ The frontend and backend communicate through a RESTful API.
             "error": "invalid user/password combo"
         }
 ```
-
-`accountType` can be one of the following: `organization`, `donationCenter`, `admin`.
-The view and functionality of the frontend will be determined by the `accountType` returned in the login response.
 
 ## Change Password
 
@@ -162,7 +158,7 @@ The view and functionality of the frontend will be determined by the `accountTyp
 Syntax same as Login Organization.
 
 ```
-/login
+/loginDonationCenter
   POST
     {
         "user": "superUniqueUserName",
@@ -172,7 +168,6 @@ Syntax same as Login Organization.
         {
             "token": "token-123-456-789",
             "user": "superUniqueUserName",
-            "accountType": "organization" | "donationCenter" | "admin"
         }
     400:
         {
@@ -182,9 +177,6 @@ Syntax same as Login Organization.
             "error": "invalid user/password combo"
         }
 ```
-
-`accountType` can be one of the following: `organization`, `donationCenter`, `admin`.
-The view and functionality of the frontend will be determined by the `accountType` returned in the login response.
 
 ## Remove DonationCenter
 
