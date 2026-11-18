@@ -24,14 +24,13 @@ The frontend and backend communicate through a RESTful API.
     200:
         {
             "token": "token-123-456-789",
-            "user": "superUniqueUserName",
         }
     400:
         {
             "error": "user does not exist"
         }
         {
-            "error": "invalid user/password combo"
+            "error": "invalid password"
         }
 ```
 
@@ -178,7 +177,7 @@ Syntax same as Login Organization.
             "error": "user does not exist"
         }
         {
-            "error": "invalid user/password combo"
+            "error": "invalid password"
         }
 ```
 
