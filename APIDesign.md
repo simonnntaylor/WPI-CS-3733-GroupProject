@@ -43,7 +43,8 @@ The frontend and backend communicate through a RESTful API.
     {
         "user": "superUniqueUserName",
         "oldPassword": "password123",
-        "newPassword": "superSecurePassword456"
+        "newPassword": "superSecurePassword456",
+        "token": "token-123-456-789"
     }
     200:
         {
@@ -52,6 +53,9 @@ The frontend and backend communicate through a RESTful API.
     400:
         {
             "error": "user does not exist"
+        }
+        {
+            "error": "invalid authorization token"
         }
         {
             "error": "invalid user/password combo"
