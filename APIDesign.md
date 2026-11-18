@@ -75,69 +75,190 @@ The frontend and backend communicate through a RESTful API.
        Payload-out-on-failure
 ```
 
-## List DonationCenters
+## List DonationCenters - Mike
 
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/listDonationCenters
+GET
     200:
-       Payload-out-on-success
+    {
+      "donationCenters": [
+        {
+          "name": "Worcester Food Pantry",
+          "totalItems": 42,
+          "totalInventoryValue": 1250.00
+        },
+        {
+          "name": "Lowell Community Closet",
+          "totalItems": 17,
+          "totalInventoryValue": 310.50
+        }
+      ]
+    }
     400:
-       Payload-out-on-failure
+    {
+      "error": "No DonationCenters are registered with the Organization"
+    }
 ```
 
-## Register DonationCenter
+## Register DonationCenter -Mike
 
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/registerDonationCenter
+POST
+{
+   "name": "Worcester Food Pantry",
+   "streetAddress": "100 Institute Rd, Worcester, MA 01609",
+   "latitude": 42.2746,
+   "longitude": -71.8063,
+   "password": "secret123"
+}
     200:
-       Payload-out-on-success
+    {
+      "name": "Worcester Food Pantry",
+      "streetAddress": "100 Institute Rd, Worcester, MA 01609",
+      "latitude": 42.2746,
+      "longitude": -71.8063,
+      "message": "DonationCenter successfully registered"
+    }
     400:
-       Payload-out-on-failure
+    {
+      "error": "DonationCenter name can't be an empty string"
+    }
+    {
+      "error": "Street address can't be an empty string"
+    }
+    {
+      "error": "Password can't be an empty string"
+    }
+    {
+      "error": "Password does not meet the minimum requirements"
+    }
+    {
+      "error": "GPS location is invalid"
+    }
+    {
+      "error": "DonationCenter name already exists"
+    }
+    {
+      "error": "A DonationCenter is already registered at this street address"
+    }
 ```
 
-## Remove DonationCenter
+## Remove DonationCenter - Mike
 
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/removeDonationCenter
+POST
+{
+   "name": "Worcester Food Pantry",
+   "confirm": true
+}
     200:
-       Payload-out-on-success
+    {
+      "name": "Worcester Food Pantry",
+      "message": "DonationCenter successfully removed"
+    }
     400:
-       Payload-out-on-failure
+    {
+      "error": "DonationCenter not found"
+    }
+    {
+      "error": "Removal must be confirmed"
+    }
 ```
 
-## List Inventory
+## List Inventory - Mike
 
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/listInventory
+POST
+{
+   "donationCenter": "Worcester Food Pantry",
+   "page": 1,
+   "pageSize": 10
+}
     200:
-       Payload-out-on-success
+    {
+      "donationCenter": "Worcester Food Pantry",
+      "items": [
+        {
+          "name": "Winter Coat",
+          "category": "Clothing",
+          "lowPrice": 15.0,
+          "highPrice": 40.0
+        },
+        {
+          "name": "Canned Soup",
+          "category": "Food",
+          "lowPrice": 1.0,
+          "highPrice": 3.0
+        }
+      ],
+      "page": 1,
+      "pageSize": 10,
+      "totalItems": 42,
+      "totalPages": 5
+    }
     400:
-       Payload-out-on-failure
+    {
+      "error": "DonationCenter not found"
+    }
+    {
+      "error": "Page must be a positive integer"
+    }
+    {
+      "error": "Page size must be a positive integer"
+    }
+    {
+      "error": "Page does not exist"
+    }
 ```
 
-## List DonationCenters (pagination)
+## List DonationCenters (pagination) - Mike
 
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/browseDonationCenters
+POST
+{
+   "page": 1,
+   "pageSize": 10
+}
     200:
-       Payload-out-on-success
+    {
+      "donationCenters": [
+        {
+          "name": "Worcester Food Pantry",
+          "streetAddress": "100 Institute Rd, Worcester, MA 01609"
+        },
+        {
+          "name": "Lowell Community Closet",
+          "streetAddress": "50 Market St, Lowell, MA 01852"
+        }
+      ],
+      "page": 1,
+      "pageSize": 10,
+      "totalDonationCenters": 23,
+      "totalPages": 3
+    }
     400:
-       Payload-out-on-failure
+    {
+      "error": "No DonationCenters are registered"
+    }
+    {
+      "error": "Page must be a positive integer"
+    }
+    {
+      "error": "Page size must be a positive integer"
+    }
+    {
+      "error": "Page does not exist"
+    }
 ```
 
 ## Map DonationCenters
