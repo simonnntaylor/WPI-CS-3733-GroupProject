@@ -155,65 +155,125 @@ The frontend and backend communicate through a RESTful API.
 
 ## Search DonationCenters by WishList
 
-
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/searchDonationCenters
+  POST
+    {
+      "wishListItem" : "shoes"
+    }
     200:
-       Payload-out-on-success
+    {
+      "donationCenters" : [
+        {
+          "donationCenterName" : "Worcester Community Closet",
+          "address" : "100 Institute Rd, Worcester, MA",
+          "zipCode" : "01609",
+          "wishListItem" : "shoes",
+          "quantityNeeded" : 20
+        }
+      ]
+    }
     400:
-       Payload-out-on-failure
+    {
+      "error" : "wishListItem is required"
+    }
 ```
 
 ## Prepare Box
 
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/prepareBox
+  POST
+    {
+      "donationCenterName" : "Worcester Community Closet",
+      "boxID" : "box-456"
+    }
     200:
-       Payload-out-on-success
+    {
+      "items" : []
+    }
     400:
-       Payload-out-on-failure
+    {
+      "error" : "Donation Center does not exist"
+    }
 ```
 
 ## Add Item to Box
-
-
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/addItemToBox
+  POST
+    {
+      "boxID" : "box-456",
+      "itemName" : "shoes",
+      "quantity" : 2
+    }
     200:
-       Payload-out-on-success
+    {
+      "boxID" : "box-456",
+      "items" : [
+        {
+          "itemName" : "shoes",
+          "quantity" : 2
+        }
+      ]
+    }
     400:
-       Payload-out-on-failure
+    {
+      "error" : "Must have an item to add into Box"
+    }
 ```
 
 ## Remove Item from Box
 
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/removeItemFromBox
+  POST
+    {
+      "boxID" : "box-456".
+      "itemName" : "shoes",
+      "quantity" : 1
+    }
     200:
-       Payload-out-on-success
+    {
+      "boxID" : "box-456",
+      "items" : [
+        {
+          "itemName" : "shoes",
+          "quantity" : 1
+        }
+      ]
+    }
     400:
-       Payload-out-on-failure
+    {
+      "error" : "item is not in box",
+      "error" : "quantity to remove item is less than quantity in box"
+    }
 ```
 
 ## Complete Box Donation
 
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/completeBoxDonation
+  POST
+    {
+      "boxID" : "box-456"
+    }
     200:
-       Payload-out-on-success
+    {
+      "boxID" : "box-456",
+      "donationCenterName" : "Worcester Community Closet",
+      "items" : [
+        {
+          "itemName" : "shoes",
+          "quantity" : 1
+        }
+      ]
+    }
     400:
-       Payload-out-on-failure
+    {
+      "error" : "Box box-456 is empty or already donated"
+    }
 ```
