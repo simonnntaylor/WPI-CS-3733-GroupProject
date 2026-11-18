@@ -29,6 +29,12 @@ POST
     {
       "error": "Catagory name can't be an empty string"
     }
+    {
+      "error": "Catagory already exists"
+    }
+    {
+      "error": "Low price cannot exceed high price"
+    }
    
 ```
 
@@ -59,20 +65,23 @@ POST
 /uploadCategoryItems
 POST
 {
-   "Category": "Furniture",
-   "Name": "Chair"
-   "lowPrice": 10,
-   "highPrice": 30
+   "category": "Furniture",
+   "name": "Chair"
+   "lowPrice": 10.0,
+   "highPrice": 30.0
 }
     200:
        {
-         "Name": "Chair"
-         "Message": "Item successfully added"
+         "name": "Chair"
+         "message": "Item successfully added"
 
        }
     400:
     {
       "error": "Category for this item does not exist yet"
+    }
+    {
+      "error": "Catagory for this item already exists
     }
 ```
 
@@ -83,20 +92,21 @@ POST
 /removeCategoryItem
 POST
 {
-   "Category": "Furniture",
-   "Name": "Chair"
-   "lowPrice": 10,
-   "highPrice": 30
+   "category": "Furniture",
+   "name": "Chair"
 }
     200:
        {
-         "Name": "Chair"
-         "Message": "Item successfully removed"
+         "name": "Chair"
+         "message": "Item successfully removed"
 
        }
     400:
     {
       "error": "Category for this item does not exist"
+    }
+     {
+      "error": "Category Item for this item does not exist"
     }
 ```
 
