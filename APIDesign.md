@@ -187,15 +187,15 @@ The frontend and backend communicate through a RESTful API.
   POST
     {
       "donationCenterName" : "Worcester Community Closet",
-      "boxID" : "box-456"
     }
     200:
     {
-      "items" : []
+      "boxID" : "box-456"
     }
     400:
     {
-      "error" : "Donation Center does not exist"
+      "error" : "Donation Center does not exist",
+      "error" : "box ID already exists"
     }
 ```
 
@@ -220,7 +220,8 @@ The frontend and backend communicate through a RESTful API.
     }
     400:
     {
-      "error" : "Must have an item to add into Box"
+      "error" : "Must have an item to add into Box",
+      "error" : "Box ID already exists"
     }
 ```
 
@@ -248,7 +249,8 @@ The frontend and backend communicate through a RESTful API.
     400:
     {
       "error" : "item is not in box",
-      "error" : "quantity to remove item is less than quantity in box"
+      "error" : "quantity to remove item is less than quantity in box",
+      "error" : "Box ID does not exist"
     }
 ```
 
