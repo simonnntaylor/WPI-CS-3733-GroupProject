@@ -23,14 +23,14 @@ POST
     200:
     {
       "name": "Appliances",
-      "message": "Catagory successfully added"
+      "message": "Category successfully added"
     }
     400:
     {
-      "error": "Catagory name can't be an empty string"
+      "error": "Category name can't be an empty string"
     }
     {
-      "error": "Catagory already exists"
+      "error": "Category already exists"
     }
     {
       "error": "Low price cannot exceed high price"
@@ -49,11 +49,11 @@ POST
     200:
     {
       "name": "Appliances",
-      "message": "Catagory successfully removed"
+      "message": "Category successfully removed"
     }
     400:
     {
-      "error": "Catagory not found"
+      "error": "Category not found"
     }
     
 ```
@@ -81,7 +81,7 @@ POST
       "error": "Category for this item does not exist yet"
     }
     {
-      "error": "Catagory for this item already exists
+      "error": "Category for this item already exists
     }
 ```
 
