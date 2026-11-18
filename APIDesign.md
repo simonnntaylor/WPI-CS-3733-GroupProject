@@ -58,7 +58,7 @@ The frontend and backend communicate through a RESTful API.
             "error": "invalid authorization token"
         }
         {
-            "error": "invalid user/password combo"
+            "error": "invalid old password"
         }
         {
             "error": "new password cannot be empty"
