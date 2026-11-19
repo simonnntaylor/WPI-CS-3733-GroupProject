@@ -252,19 +252,6 @@ POST
     }
 ```
 
-## Remove DonationCenter - Mike
-
-
-```
-/removeDonationCenter
-POST
-    {
-      "token": "abc123token",
-      "confirm": true
-    }
-       Payload-out-on-failure
-```
-
 ## Login DonationCenter
 
 Syntax same as Login Organization.
@@ -290,13 +277,16 @@ Syntax same as Login Organization.
         }
 ```
 
-## Remove DonationCenter
+## Remove DonationCenter - Mike
 
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/removeDonationCenter
+POST
+    {
+      "token": "abc123token",
+      "confirm": true
+    }
     200:
     {
       "name": "Worcester Food Pantry",
