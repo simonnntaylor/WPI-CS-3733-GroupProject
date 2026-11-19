@@ -87,7 +87,7 @@ POST
     {
       "error": "Category already exists"
     }
-   
+
 ```
 
 ## Remove Category - Sam
@@ -107,11 +107,10 @@ POST
     {
       "error": "Category not found"
     }
-    
+
 ```
 
 ## Upload Category Items - Sam
-
 
 ```
 /uploadCategoryItems
@@ -135,7 +134,6 @@ POST
 ```
 
 ## Remove Category Item - Sam
-
 
 ```
 /removeCategoryItem
@@ -161,6 +159,7 @@ POST
 ```
 
 ## Edit Category Item - Sam
+
 ```
 /editCategoryItem
 PUT
@@ -174,7 +173,7 @@ PUT
    200:
       {
          "message": "Category item successfully updated"
-      }    
+      }
    400:
       {
          "error": "Low price cannot exceed high price"
@@ -185,7 +184,6 @@ PUT
 ```
 
 ## List DonationCenters - Mike
-
 
 ```
 /listDonationCenters
@@ -208,7 +206,6 @@ GET
 ```
 
 ## Register DonationCenter -Mike
-
 
 ```
 /registerDonationCenter
@@ -254,7 +251,6 @@ POST
 
 ## Remove DonationCenter - Mike
 
-
 ```
 /removeDonationCenter
 POST
@@ -292,7 +288,6 @@ Syntax same as Login Organization.
 
 ## Remove DonationCenter
 
-
 ```
 /resourceName
   GET or POST
@@ -312,7 +307,6 @@ Syntax same as Login Organization.
 ```
 
 ## List Inventory - Mike
-
 
 ```
 /listInventory
@@ -360,7 +354,6 @@ POST
 
 ## List DonationCenters (pagination) - Mike
 
-
 ```
 /browseDonationCenters
 POST
@@ -402,7 +395,6 @@ POST
 ```
 
 ## Map DonationCenters
-
 
 ```
 /donationCenterMap
@@ -452,7 +444,6 @@ POST
 
 ## Prepare Box
 
-
 ```
 /prepareBox
   POST
@@ -473,6 +464,7 @@ POST
 ```
 
 ## Add Item to Box
+
 ```
 /addItemToBox
   POST
@@ -501,7 +493,6 @@ POST
 ```
 
 ## Remove Item from Box
-
 
 ```
 /removeItemFromBox
@@ -534,7 +525,6 @@ POST
 ```
 
 ## Complete Box Donation
-
 
 ```
 /completeBoxDonation
