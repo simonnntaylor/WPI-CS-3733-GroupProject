@@ -67,67 +67,121 @@ The frontend and backend communicate through a RESTful API.
         }
 ```
 
-## Add Category
+## Add Category - Sam
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/addCategory
+POST
+{
+   "name": "Appliances"
+}
     200:
-       Payload-out-on-success
+    {
+      "name": "Appliances",
+      "message": "Category successfully added"
+    }
     400:
-       Payload-out-on-failure
+    {
+      "error": "Category name can't be an empty string"
+    }
+    {
+      "error": "Category already exists"
+    }
+   
 ```
 
-## Remove Category
+## Remove Category - Sam
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/removeCategory
+POST
+{
+   "name": "Appliances"
+}
     200:
-       Payload-out-on-success
+    {
+      "name": "Appliances",
+      "message": "Category successfully removed"
+    }
     400:
-       Payload-out-on-failure
+    {
+      "error": "Category not found"
+    }
+    
 ```
 
-## Upload Category Items
+## Upload Category Items - Sam
 
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/uploadCategoryItems
+POST
+{
+   "category": "Furniture",
+   "name": "Chair"
+   "lowPrice": 10.0,
+   "highPrice": 30.0
+}
     200:
-       Payload-out-on-success
+       {
+            "name": "Chair"
+            "message": "Item successfully added"
+
+       }
     400:
-       Payload-out-on-failure
+    {
+         "error": "Category for this item does not exist yet"
+    }
 ```
 
-## Remove Category Item
+## Remove Category Item - Sam
 
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/removeCategoryItem
+POST
+{
+   "category": "Furniture",
+   "name": "Chair"
+}
     200:
-       Payload-out-on-success
+       {
+            "category": "Furniture"
+            "name": "Chair"
+            "message": "Item successfully removed"
+
+       }
     400:
-       Payload-out-on-failure
+    {
+         "error": "Category for this item does not exist"
+    }
+    {
+         "error": "Category Item for this item does not exist"
+    }
 ```
 
-## Edit Category Item
-
-
+## Edit Category Item - Sam
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
-    200:
-       Payload-out-on-success
-    400:
-       Payload-out-on-failure
+/editCategoryItem
+PUT
+{
+  "category": "Furniture",
+  "originalName": "Chair",
+  "name": "Office Chair",
+  "lowPrice": 15,
+  "highPrice": 40
+}
+   200:
+      {
+         "message": "Category item successfully updated"
+      }    
+   400:
+      {
+         "error": "Low price cannot exceed high price"
+      }
+      {
+         "error": "Category Item requested not found"
+      }
 ```
 
 ## List DonationCenters
