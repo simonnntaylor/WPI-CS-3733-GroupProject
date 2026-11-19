@@ -194,7 +194,9 @@ The frontend and backend communicate through a RESTful API.
     }
     400:
     {
-      "error" : "Donation Center does not exist",
+      "error" : "Donation Center does not exist"
+    }
+    {
       "error" : "box ID already exists"
     }
 ```
@@ -220,7 +222,9 @@ The frontend and backend communicate through a RESTful API.
     }
     400:
     {
-      "error" : "Must have an item to add into Box",
+      "error" : "Must have an item to add into Box"
+    }
+    {
       "error" : "Box ID already exists"
     }
 ```
@@ -248,8 +252,12 @@ The frontend and backend communicate through a RESTful API.
     }
     400:
     {
-      "error" : "item is not in box",
-      "error" : "quantity to remove item is less than quantity in box",
+      "error" : "item is not in box"
+    }
+    {
+      "error" : "quantity to remove item is less than quantity in box"
+    }
+    {
       "error" : "Box ID does not exist"
     }
 ```
@@ -276,6 +284,9 @@ The frontend and backend communicate through a RESTful API.
     }
     400:
     {
-      "error" : "Box box-456 is empty or already donated"
+      "error" : "Box box-456 is empty"
+    }
+    {
+      "error" : "Box-456 is already donated"
     }
 ```
