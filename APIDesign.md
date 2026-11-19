@@ -405,13 +405,23 @@ POST
 
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/donationCenterMap
+  GET
     200:
-       Payload-out-on-success
-    400:
-       Payload-out-on-failure
+    {
+        "donationCenters": [
+            {
+            "name": "Worcester Food Pantry",
+            "latitude": 42.2746,
+            "longitude": -71.8063
+            },
+            {
+            "name": "Lowell Community Closet",
+            "latitude": 42.6334,
+            "longitude": -71.3162
+            }
+        ]
+    }
 ```
 
 ## Search DonationCenters by WishList
