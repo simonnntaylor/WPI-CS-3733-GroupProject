@@ -425,8 +425,7 @@ POST
       "donationCenters" : [
         {
           "donationCenterName" : "Worcester Community Closet",
-          "address" : "100 Institute Rd, Worcester, MA",
-          "zipCode" : "01609",
+          "address" : "100 Institute Rd, Worcester, MA, 01609",
           "wishListItem" : "shoes",
           "quantityNeeded" : 20
         }
