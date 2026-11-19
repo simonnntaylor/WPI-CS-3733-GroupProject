@@ -32,9 +32,6 @@ POST
     {
       "error": "Category already exists"
     }
-    {
-      "error": "Low price cannot exceed high price"
-    }
    
 ```
 
@@ -72,16 +69,13 @@ POST
 }
     200:
        {
-         "name": "Chair"
-         "message": "Item successfully added"
+            "name": "Chair"
+            "message": "Item successfully added"
 
        }
     400:
     {
-      "error": "Category for this item does not exist yet"
-    }
-    {
-      "error": "Category for this item already exists
+         "error": "Category for this item does not exist yet"
     }
 ```
 
@@ -97,16 +91,17 @@ POST
 }
     200:
        {
-         "name": "Chair"
-         "message": "Item successfully removed"
+            "category": "Furniture"
+            "name": "Chair"
+            "message": "Item successfully removed"
 
        }
     400:
     {
-      "error": "Category for this item does not exist"
+         "error": "Category for this item does not exist"
     }
-     {
-      "error": "Category Item for this item does not exist"
+    {
+         "error": "Category Item for this item does not exist"
     }
 ```
 
@@ -123,11 +118,14 @@ PUT
 }
    200:
       {
-      "message": "Category item successfully updated"
+         "message": "Category item successfully updated"
       }    
    400:
       {
-      "error": "Low price cannot exceed high price"
+         "error": "Low price cannot exceed high price"
+      }
+      {
+         "error": "Category Item requested not found"
       }
 ```
 
