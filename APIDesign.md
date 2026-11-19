@@ -87,7 +87,7 @@ POST
     {
       "error": "Category already exists"
     }
-   
+
 ```
 
 ## Remove Category - Sam
@@ -107,25 +107,36 @@ POST
     {
       "error": "Category not found"
     }
-    
+
 ```
 
 ## Upload Category Items - Sam
-
 
 ```
 /uploadCategoryItems
 POST
 {
    "category": "Furniture",
-   "name": "Chair"
-   "lowPrice": 10.0,
-   "highPrice": 30.0
+   "items": [
+   {
+    "name": "Chair"
+    "lowPrice": 10.0,
+    "highPrice": 30.0,
+    },
+   {
+    "name": "Table"
+    "lowPrice": 30.0,
+    "highPrice": 50.0,
+    }
+   ]
 }
     200:
        {
-            "name": "Chair"
-            "message": "Item successfully added"
+            "names": [
+                "Chair",
+                "Table"
+            ]
+            "message": "Item(s) successfully added"
 
        }
     400:
@@ -135,7 +146,6 @@ POST
 ```
 
 ## Remove Category Item - Sam
-
 
 ```
 /removeCategoryItem
@@ -161,6 +171,7 @@ POST
 ```
 
 ## Edit Category Item - Sam
+
 ```
 /editCategoryItem
 PUT
@@ -168,13 +179,13 @@ PUT
   "category": "Furniture",
   "originalName": "Chair",
   "name": "Office Chair",
-  "lowPrice": 15,
-  "highPrice": 40
+  "lowPrice": 15.0,
+  "highPrice": 40.0
 }
    200:
       {
          "message": "Category item successfully updated"
-      }    
+      }
    400:
       {
          "error": "Low price cannot exceed high price"
@@ -186,10 +197,12 @@ PUT
 
 ## List DonationCenters - Mike
 
-
 ```
 /listDonationCenters
-GET
+POST
+{
+    "token": "abc123token"
+}
     200:
     {
       "donationCenters": [
@@ -208,7 +221,6 @@ GET
 ```
 
 ## Register DonationCenter -Mike
-
 
 ```
 /registerDonationCenter
@@ -252,19 +264,6 @@ POST
     }
 ```
 
-## Remove DonationCenter - Mike
-
-
-```
-/removeDonationCenter
-POST
-    {
-      "token": "abc123token",
-      "confirm": true
-    }
-       Payload-out-on-failure
-```
-
 ## Login DonationCenter
 
 Syntax same as Login Organization.
@@ -290,13 +289,15 @@ Syntax same as Login Organization.
         }
 ```
 
-## Remove DonationCenter
-
+## Remove DonationCenter - Mike
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/removeDonationCenter
+POST
+    {
+      "token": "abc123token",
+      "confirm": true
+    }
     200:
     {
       "name": "Worcester Food Pantry",
@@ -312,7 +313,6 @@ Syntax same as Login Organization.
 ```
 
 ## List Inventory - Mike
-
 
 ```
 /listInventory
@@ -360,7 +360,6 @@ POST
 
 ## List DonationCenters (pagination) - Mike
 
-
 ```
 /browseDonationCenters
 POST
@@ -403,7 +402,6 @@ POST
 
 ## Map DonationCenters
 
-
 ```
 /donationCenterMap
   GET
@@ -437,8 +435,7 @@ POST
       "donationCenters" : [
         {
           "donationCenterName" : "Worcester Community Closet",
-          "address" : "100 Institute Rd, Worcester, MA",
-          "zipCode" : "01609",
+          "address" : "100 Institute Rd, Worcester, MA, 01609",
           "wishListItem" : "shoes",
           "quantityNeeded" : 20
         }
@@ -451,7 +448,6 @@ POST
 ```
 
 ## Prepare Box
-
 
 ```
 /prepareBox
@@ -473,6 +469,7 @@ POST
 ```
 
 ## Add Item to Box
+
 ```
 /addItemToBox
   POST
@@ -501,7 +498,6 @@ POST
 ```
 
 ## Remove Item from Box
-
 
 ```
 /removeItemFromBox
@@ -534,7 +530,6 @@ POST
 ```
 
 ## Complete Box Donation
-
 
 ```
 /completeBoxDonation
