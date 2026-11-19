@@ -184,29 +184,84 @@ PUT
       }
 ```
 
-## List DonationCenters
+## List DonationCenters - Mike
 
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/listDonationCenters
+GET
     200:
-       Payload-out-on-success
-    400:
-       Payload-out-on-failure
+    {
+      "donationCenters": [
+        {
+          "name": "Worcester Food Pantry",
+          "totalItems": 42,
+          "totalInventoryValue": 1250.00
+        },
+        {
+          "name": "Lowell Community Closet",
+          "totalItems": 17,
+          "totalInventoryValue": 310.50
+        }
+      ]
+    }
 ```
 
-## Register DonationCenter
+## Register DonationCenter -Mike
 
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/registerDonationCenter
+POST
+    {
+      "name": "Worcester Food Pantry",
+      "streetAddress": "100 Institute Rd, Worcester, MA 01609",
+      "latitude": 42.2746,
+      "longitude": -71.8063,
+      "password": "secret123"
+    }
     200:
-       Payload-out-on-success
+    {
+      "name": "Worcester Food Pantry",
+      "streetAddress": "100 Institute Rd, Worcester, MA 01609",
+      "latitude": 42.2746,
+      "longitude": -71.8063,
+      "message": "DonationCenter successfully registered"
+    }
     400:
+    {
+      "error": "DonationCenter name can't be an empty string"
+    }
+    {
+      "error": "Street address can't be an empty string"
+    }
+    {
+      "error": "Password can't be an empty string"
+    }
+    {
+      "error": "Password must be at least 8 characters and contain at least one letter and one number"
+    }
+    {
+      "error": "GPS location is invalid"
+    }
+    {
+      "error": "DonationCenter name already exists"
+    }
+    {
+      "error": "A DonationCenter is already registered at this street address"
+    }
+```
+
+## Remove DonationCenter - Mike
+
+
+```
+/removeDonationCenter
+POST
+    {
+      "token": "abc123token",
+      "confirm": true
+    }
        Payload-out-on-failure
 ```
 
@@ -243,35 +298,107 @@ Syntax same as Login Organization.
   GET or POST
     Payload-to-aws-if-present
     200:
-       Payload-out-on-success
+    {
+      "name": "Worcester Food Pantry",
+      "message": "DonationCenter successfully removed"
+    }
     400:
-       Payload-out-on-failure
+    {
+      "error": "Invalid or expired token"
+    }
+    {
+      "error": "Removal must be confirmed"
+    }
 ```
 
-## List Inventory
+## List Inventory - Mike
 
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/listInventory
+POST
+    {
+      "token": "abc123token",
+      "page": 1,
+      "pageSize": 10
+    }
     200:
-       Payload-out-on-success
+    {
+      "items": [
+        {
+          "name": "Winter Coat",
+          "category": "Clothing",
+          "lowPrice": 15.0,
+          "highPrice": 40.0
+        },
+        {
+          "name": "Canned Soup",
+          "category": "Food",
+          "lowPrice": 1.0,
+          "highPrice": 3.0
+        }
+      ],
+      "page": 1,
+      "pageSize": 10,
+      "totalItems": 42,
+      "totalPages": 5
+    }
     400:
-       Payload-out-on-failure
+    {
+      "error": "Invalid or expired token"
+    }
+    {
+      "error": "Page must be greater than zero"
+    }
+    {
+      "error": "Page size must be greater than zero"
+    }
+    {
+      "error": "Page does not exist"
+    }
 ```
 
-## List DonationCenters (pagination)
+## List DonationCenters (pagination) - Mike
 
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/browseDonationCenters
+POST
+    {
+      "page": 1,
+      "pageSize": 10
+    }
     200:
-       Payload-out-on-success
+    {
+      "donationCenters": [
+        {
+          "name": "Worcester Food Pantry",
+          "streetAddress": "100 Institute Rd, Worcester, MA 01609",
+          "latitude": 42.2746,
+          "longitude": -71.8063
+        },
+        {
+          "name": "Lowell Community Closet",
+          "streetAddress": "50 Market St, Lowell, MA 01852",
+          "latitude": 42.6334,
+          "longitude": -71.3162
+        }
+      ],
+      "page": 1,
+      "pageSize": 10,
+      "totalDonationCenters": 23,
+      "totalPages": 3
+    }
     400:
-       Payload-out-on-failure
+    {
+      "error": "Page must be greater than zero"
+    }
+    {
+      "error": "Page size must be greater than zero"
+    }
+    {
+      "error": "Page does not exist"
+    }
 ```
 
 ## Map DonationCenters
