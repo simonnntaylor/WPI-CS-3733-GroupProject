@@ -12,67 +12,176 @@ The frontend and backend communicate through a RESTful API.
        Payload-out-on-failure
 ```
 
-## Add Category
+## Login Organization
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/loginOrganization
+  POST
+    {
+        "user": "superUniqueUserName",
+        "password": "password123"
+    }
     200:
-       Payload-out-on-success
+        {
+            "token": "token-123-456-789",
+        }
     400:
-       Payload-out-on-failure
+        {
+            "error": "user does not exist"
+        }
+        {
+            "error": "invalid password"
+        }
 ```
 
-## Remove Category
+## Change Password
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/changePassword
+  POST
+    {
+        "user": "superUniqueUserName",
+        "oldPassword": "password123",
+        "newPassword": "superSecurePassword456",
+        "token": "token-123-456-789"
+    }
     200:
-       Payload-out-on-success
+        {
+            "message": "password changed successfully"
+        }
     400:
-       Payload-out-on-failure
+        {
+            "error": "user does not exist"
+        }
+        {
+            "error": "invalid authorization token"
+        }
+        {
+            "error": "invalid old password"
+        }
+        {
+            "error": "new password cannot be empty"
+        }
+        {
+            "error": "new password cannot be the same as the old password"
+        }
 ```
 
-## Upload Category Items
-
+## Add Category - Sam
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/addCategory
+POST
+{
+   "name": "Appliances"
+}
     200:
-       Payload-out-on-success
+    {
+      "name": "Appliances",
+      "message": "Category successfully added"
+    }
     400:
-       Payload-out-on-failure
+    {
+      "error": "Category name can't be an empty string"
+    }
+    {
+      "error": "Category already exists"
+    }
+   
 ```
 
-## Remove Category Item
-
+## Remove Category - Sam
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/removeCategory
+POST
+{
+   "name": "Appliances"
+}
     200:
-       Payload-out-on-success
+    {
+      "name": "Appliances",
+      "message": "Category successfully removed"
+    }
     400:
-       Payload-out-on-failure
+    {
+      "error": "Category not found"
+    }
+    
 ```
 
-## Edit Category Item
+## Upload Category Items - Sam
 
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/uploadCategoryItems
+POST
+{
+   "category": "Furniture",
+   "name": "Chair"
+   "lowPrice": 10.0,
+   "highPrice": 30.0
+}
     200:
-       Payload-out-on-success
+       {
+            "name": "Chair"
+            "message": "Item successfully added"
+
+       }
     400:
-       Payload-out-on-failure
+    {
+         "error": "Category for this item does not exist yet"
+    }
+```
+
+## Remove Category Item - Sam
+
+
+```
+/removeCategoryItem
+POST
+{
+   "category": "Furniture",
+   "name": "Chair"
+}
+    200:
+       {
+            "category": "Furniture"
+            "name": "Chair"
+            "message": "Item successfully removed"
+
+       }
+    400:
+    {
+         "error": "Category for this item does not exist"
+    }
+    {
+         "error": "Category Item for this item does not exist"
+    }
+```
+
+## Edit Category Item - Sam
+```
+/editCategoryItem
+PUT
+{
+  "category": "Furniture",
+  "originalName": "Chair",
+  "name": "Office Chair",
+  "lowPrice": 15,
+  "highPrice": 40
+}
+   200:
+      {
+         "message": "Category item successfully updated"
+      }    
+   400:
+      {
+         "error": "Low price cannot exceed high price"
+      }
+      {
+         "error": "Category Item requested not found"
+      }
 ```
 
 ## List DonationCenters - Mike
@@ -153,6 +262,41 @@ POST
       "token": "abc123token",
       "confirm": true
     }
+       Payload-out-on-failure
+```
+
+## Login DonationCenter
+
+Syntax same as Login Organization.
+
+```
+/loginDonationCenter
+  POST
+    {
+        "user": "superUniqueUserName",
+        "password": "password123"
+    }
+    200:
+        {
+            "token": "token-123-456-789",
+            "user": "superUniqueUserName",
+        }
+    400:
+        {
+            "error": "user does not exist"
+        }
+        {
+            "error": "invalid password"
+        }
+```
+
+## Remove DonationCenter
+
+
+```
+/resourceName
+  GET or POST
+    Payload-to-aws-if-present
     200:
     {
       "name": "Worcester Food Pantry",
@@ -272,65 +416,138 @@ POST
 
 ## Search DonationCenters by WishList
 
-
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/searchDonationCenters
+  POST
+    {
+      "wishListItem" : "shoes"
+    }
     200:
-       Payload-out-on-success
+    {
+      "donationCenters" : [
+        {
+          "donationCenterName" : "Worcester Community Closet",
+          "address" : "100 Institute Rd, Worcester, MA",
+          "zipCode" : "01609",
+          "wishListItem" : "shoes",
+          "quantityNeeded" : 20
+        }
+      ]
+    }
     400:
-       Payload-out-on-failure
+    {
+      "error" : "wishListItem is required"
+    }
 ```
 
 ## Prepare Box
 
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/prepareBox
+  POST
+    {
+      "donationCenterName" : "Worcester Community Closet",
+    }
     200:
-       Payload-out-on-success
+    {
+      "boxID" : "box-456"
+    }
     400:
-       Payload-out-on-failure
+    {
+      "error" : "Donation Center does not exist"
+    }
+    {
+      "error" : "box ID already exists"
+    }
 ```
 
 ## Add Item to Box
-
-
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/addItemToBox
+  POST
+    {
+      "boxID" : "box-456",
+      "itemName" : "shoes",
+      "quantity" : 2
+    }
     200:
-       Payload-out-on-success
+    {
+      "boxID" : "box-456",
+      "items" : [
+        {
+          "itemName" : "shoes",
+          "quantity" : 2
+        }
+      ]
+    }
     400:
-       Payload-out-on-failure
+    {
+      "error" : "Must have an item to add into Box"
+    }
+    {
+      "error" : "Box ID already exists"
+    }
 ```
 
 ## Remove Item from Box
 
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/removeItemFromBox
+  POST
+    {
+      "boxID" : "box-456".
+      "itemName" : "shoes",
+      "quantity" : 1
+    }
     200:
-       Payload-out-on-success
+    {
+      "boxID" : "box-456",
+      "items" : [
+        {
+          "itemName" : "shoes",
+          "quantity" : 1
+        }
+      ]
+    }
     400:
-       Payload-out-on-failure
+    {
+      "error" : "item is not in box"
+    }
+    {
+      "error" : "quantity to remove item is less than quantity in box"
+    }
+    {
+      "error" : "Box ID does not exist"
+    }
 ```
 
 ## Complete Box Donation
 
 
 ```
-/resourceName
-  GET or POST
-    Payload-to-aws-if-present
+/completeBoxDonation
+  POST
+    {
+      "boxID" : "box-456"
+    }
     200:
-       Payload-out-on-success
+    {
+      "boxID" : "box-456",
+      "donationCenterName" : "Worcester Community Closet",
+      "items" : [
+        {
+          "itemName" : "shoes",
+          "quantity" : 1
+        }
+      ]
+    }
     400:
-       Payload-out-on-failure
+    {
+      "error" : "Box box-456 is empty"
+    }
+    {
+      "error" : "Box-456 is already donated"
+    }
 ```
