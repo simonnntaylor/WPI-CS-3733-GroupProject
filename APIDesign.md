@@ -96,10 +96,6 @@ GET
         }
       ]
     }
-    400:
-    {
-      "error": "No DonationCenters are registered with the Organization"
-    }
 ```
 
 ## Register DonationCenter -Mike
@@ -108,13 +104,13 @@ GET
 ```
 /registerDonationCenter
 POST
-{
-   "name": "Worcester Food Pantry",
-   "streetAddress": "100 Institute Rd, Worcester, MA 01609",
-   "latitude": 42.2746,
-   "longitude": -71.8063,
-   "password": "secret123"
-}
+    {
+      "name": "Worcester Food Pantry",
+      "streetAddress": "100 Institute Rd, Worcester, MA 01609",
+      "latitude": 42.2746,
+      "longitude": -71.8063,
+      "password": "secret123"
+    }
     200:
     {
       "name": "Worcester Food Pantry",
@@ -134,7 +130,7 @@ POST
       "error": "Password can't be an empty string"
     }
     {
-      "error": "Password does not meet the minimum requirements"
+      "error": "Password must be at least 8 characters and contain at least one letter and one number"
     }
     {
       "error": "GPS location is invalid"
@@ -153,10 +149,10 @@ POST
 ```
 /removeDonationCenter
 POST
-{
-   "name": "Worcester Food Pantry",
-   "confirm": true
-}
+    {
+      "token": "abc123token",
+      "confirm": true
+    }
     200:
     {
       "name": "Worcester Food Pantry",
@@ -164,7 +160,7 @@ POST
     }
     400:
     {
-      "error": "DonationCenter not found"
+      "error": "Invalid or expired token"
     }
     {
       "error": "Removal must be confirmed"
@@ -177,14 +173,13 @@ POST
 ```
 /listInventory
 POST
-{
-   "donationCenter": "Worcester Food Pantry",
-   "page": 1,
-   "pageSize": 10
-}
+    {
+      "token": "abc123token",
+      "page": 1,
+      "pageSize": 10
+    }
     200:
     {
-      "donationCenter": "Worcester Food Pantry",
       "items": [
         {
           "name": "Winter Coat",
@@ -206,13 +201,13 @@ POST
     }
     400:
     {
-      "error": "DonationCenter not found"
+      "error": "Invalid or expired token"
     }
     {
-      "error": "Page must be a positive integer"
+      "error": "Page must be greater than zero"
     }
     {
-      "error": "Page size must be a positive integer"
+      "error": "Page size must be greater than zero"
     }
     {
       "error": "Page does not exist"
@@ -225,20 +220,24 @@ POST
 ```
 /browseDonationCenters
 POST
-{
-   "page": 1,
-   "pageSize": 10
-}
+    {
+      "page": 1,
+      "pageSize": 10
+    }
     200:
     {
       "donationCenters": [
         {
           "name": "Worcester Food Pantry",
-          "streetAddress": "100 Institute Rd, Worcester, MA 01609"
+          "streetAddress": "100 Institute Rd, Worcester, MA 01609",
+          "latitude": 42.2746,
+          "longitude": -71.8063
         },
         {
           "name": "Lowell Community Closet",
-          "streetAddress": "50 Market St, Lowell, MA 01852"
+          "streetAddress": "50 Market St, Lowell, MA 01852",
+          "latitude": 42.6334,
+          "longitude": -71.3162
         }
       ],
       "page": 1,
@@ -248,13 +247,10 @@ POST
     }
     400:
     {
-      "error": "No DonationCenters are registered"
+      "error": "Page must be greater than zero"
     }
     {
-      "error": "Page must be a positive integer"
-    }
-    {
-      "error": "Page size must be a positive integer"
+      "error": "Page size must be greater than zero"
     }
     {
       "error": "Page does not exist"
