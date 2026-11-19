@@ -12,6 +12,61 @@ The frontend and backend communicate through a RESTful API.
        Payload-out-on-failure
 ```
 
+## Login Organization
+
+```
+/loginOrganization
+  POST
+    {
+        "user": "superUniqueUserName",
+        "password": "password123"
+    }
+    200:
+        {
+            "token": "token-123-456-789",
+        }
+    400:
+        {
+            "error": "user does not exist"
+        }
+        {
+            "error": "invalid password"
+        }
+```
+
+## Change Password
+
+```
+/changePassword
+  POST
+    {
+        "user": "superUniqueUserName",
+        "oldPassword": "password123",
+        "newPassword": "superSecurePassword456",
+        "token": "token-123-456-789"
+    }
+    200:
+        {
+            "message": "password changed successfully"
+        }
+    400:
+        {
+            "error": "user does not exist"
+        }
+        {
+            "error": "invalid authorization token"
+        }
+        {
+            "error": "invalid old password"
+        }
+        {
+            "error": "new password cannot be empty"
+        }
+        {
+            "error": "new password cannot be the same as the old password"
+        }
+```
+
 ## Add Category - Sam
 
 ```
@@ -153,6 +208,31 @@ PUT
        Payload-out-on-success
     400:
        Payload-out-on-failure
+```
+
+## Login DonationCenter
+
+Syntax same as Login Organization.
+
+```
+/loginDonationCenter
+  POST
+    {
+        "user": "superUniqueUserName",
+        "password": "password123"
+    }
+    200:
+        {
+            "token": "token-123-456-789",
+            "user": "superUniqueUserName",
+        }
+    400:
+        {
+            "error": "user does not exist"
+        }
+        {
+            "error": "invalid password"
+        }
 ```
 
 ## Remove DonationCenter
