@@ -189,7 +189,10 @@ PUT
 
 ```
 /listDonationCenters
-GET
+{
+    "token": "abc123token"
+}
+POST
     200:
     {
       "donationCenters": [
