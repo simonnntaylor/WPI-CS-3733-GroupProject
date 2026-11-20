@@ -1,3 +1,9 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Donation Center - Donazion",
+  description: "A donation platform for organizations and donation centers.",
+};
 
 export default function Center() {
   return (

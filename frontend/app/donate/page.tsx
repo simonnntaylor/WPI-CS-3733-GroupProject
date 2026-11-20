@@ -1,3 +1,9 @@
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Donate - Donazion",
+  description: "A donation platform for organizations and donation centers.",
+};
 
 export default function Donate() {
   return (
