@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -12,7 +13,7 @@ export default function Donate() {
         <h1 className="text-4xl font-bold text-zinc-900 dark:text-zinc-100">
           Donate page
         </h1>
-        <a href="/" className="text-blue-500 hover:underline mt-4">Go back to Home</a>
+        <Link href="/" className="text-blue-500 hover:underline mt-4">Go back to Home</Link>
       </main>
     </div>
   );

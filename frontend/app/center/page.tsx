@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Donation Center - Donazion",
@@ -12,7 +13,7 @@ export default function Center() {
         <h1 className="text-4xl font-bold text-zinc-900 dark:text-zinc-100">
           Donation Center page
         </h1>
-        <a href="/" className="text-blue-500 hover:underline mt-4">Go back to Home</a>
+        <Link href="/" className="text-blue-500 hover:underline mt-4">Go back to Home</Link>
       </main>
     </div>
   );
