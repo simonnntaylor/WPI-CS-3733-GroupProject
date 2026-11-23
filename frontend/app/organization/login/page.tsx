@@ -17,25 +17,24 @@ export default function Login() {
         username: form.elements.username.value,
         password: form.elements.password.value,
       });
+      if (
+        result.nextStep.signInStep ===
+        "CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED"
+      ) {
+        const newPassword = prompt("Enter a new permanent password:");
+
+        if (!newPassword) return;
+
+        const confirmResult = await confirmSignIn({
+          challengeResponse: newPassword,
+        });
+
+        console.log("Password change result:", confirmResult);
+      } else if (result.nextStep.signInStep === "DONE") {
+        console.log("Login successful!");
+      }
     } catch (NoAuthorizationException) {
       alert("Invalid username or password. Please try again.");
-    }
-
-    if (
-      result.nextStep.signInStep ===
-      "CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED"
-    ) {
-      const newPassword = prompt("Enter a new permanent password:");
-
-      if (!newPassword) return;
-
-      const confirmResult = await confirmSignIn({
-        challengeResponse: newPassword,
-      });
-
-      console.log("Password change result:", confirmResult);
-    } else if (result.nextStep.signInStep === "DONE") {
-      console.log("Login successful!");
     }
   }
 
