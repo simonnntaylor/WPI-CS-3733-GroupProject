@@ -1,7 +1,7 @@
 "use client";
 import type { FormEvent } from "react"
 import { Amplify } from "aws-amplify"
-import { signUp } from "aws-amplify/auth"
+import { signUp, confirmSignUp } from "aws-amplify/auth"
 import "@/lib/amplify";
 
 interface SignUpFormElements extends HTMLFormControlsCollection {
@@ -28,8 +28,17 @@ export default function App() {
         userAttributes: {
             email: form.elements.email.value,
         },
-    },
+      },
     })
+
+    const code = prompt("Enter confirmation code:");
+
+    if (code === null) return;
+
+    const result = await confirmSignUp({
+    username: form.elements.username.value,
+    confirmationCode: code,
+    });
   }
 
   return (
