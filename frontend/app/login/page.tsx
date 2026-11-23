@@ -24,16 +24,28 @@ export default function Login() {
 
         if (!newPassword) return;
 
+        const email = prompt("Enter your email address:");
+        
+        if (email === null) return;
+
         const confirmResult = await confirmSignIn({
             challengeResponse: newPassword,
-        });
+            options: {
+                userAttributes: {
+                    email: email,
+                },
+        }});
 
         console.log("Password change result:", confirmResult);
     } 
+    else if (result.nextStep.signInStep === "CONTINUE_SIGN_IN_WITH_EMAIL_SETUP") {
+    }
+
     else if (result.nextStep.signInStep === "DONE") {
         console.log("Login successful!");
         }
     }
+
 
   return (
     <form onSubmit={handleSubmit}>
