@@ -6,8 +6,9 @@ const nextConfig: NextConfig = {
     agentFeedback: true,
     agentUpgrade: "security",
   },
-  cacheComponents: true,
-  partialPrefetching: true,
+  output: "export",
+  // cacheComponents: true,
+  // partialPrefetching: true,
   turbopack: {
     rules: {
       "*.css": {
