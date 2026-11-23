@@ -24,12 +24,22 @@ export default function Login() {
         const newPassword = prompt("Enter a new permanent password:");
 
         if (!newPassword) return;
+        const email = prompt("Enter your email address:");
+        if (email === null) return;
 
         const confirmResult = await confirmSignIn({
           challengeResponse: newPassword,
+          options: {
+            userAttributes: {
+              email: email,
+            },
+          },
         });
 
         console.log("Password change result:", confirmResult);
+      } else if (result.nextStep.signInStep === "CONTINUE_SIGN_IN_WITH_EMAIL_SETUP") {
+        // Handle email setup step if needed
+        // You can prompt the user to set up their email or perform any necessary actions here
       } else if (result.nextStep.signInStep === "DONE") {
         console.log("Login successful!");
       }
