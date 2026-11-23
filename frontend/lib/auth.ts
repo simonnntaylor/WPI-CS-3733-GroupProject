@@ -9,6 +9,6 @@ interface SignInFormElements extends HTMLFormControlsCollection {
   password: HTMLInputElement
 }
 
-interface SignInForm extends HTMLFormElement {
+export interface SignInForm extends HTMLFormElement {
   readonly elements: SignInFormElements
 }
