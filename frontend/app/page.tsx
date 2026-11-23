@@ -61,6 +61,14 @@ export default function Home() {
             >
               <span className="text-white text-lg font-semibold">Logout</span>
             </button>
+            <div className="bg-slate-500 rounded w-40 h-12 flex items-center justify-center hover:bg-red-900 transition hover:scale-105">
+              <Link
+                href="/change-password"
+                className="text-white text-lg font-semibold"
+              >
+                Change Password
+              </Link>
+            </div>
           </>
         ) : (
           <>
