@@ -1,10 +1,10 @@
 "use client";
 //tells the bundler that the module and everything imported into it should be sent to and run in the user's browser
-import "../../../lib/amplify";
-import "../../../lib/auth";
+import "../../lib/amplify";
+import "../../lib/auth";
 import type { SubmitEvent } from "react";
 import { signIn, confirmSignIn } from "aws-amplify/auth";
-import { SignInForm } from "../../../lib/auth";
+import { SignInForm } from "../../lib/auth";
 
 //AWS requires a new passwrod when you first sign in. How I delt with it was found here: https://docs.amplify.aws/react/frontend/auth/multi-step-sign-in/?
 export default function Login() {
