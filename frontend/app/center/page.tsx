@@ -13,7 +13,22 @@ export default function Center() {
         <h1 className="text-4xl font-bold text-zinc-900 dark:text-zinc-100">
           Donation Center page
         </h1>
-        <Link href="/" className="text-blue-500 hover:underline mt-4">Go back to Home</Link>
+        <Link href="/" className="text-blue-500 hover:underline mt-4">
+          Go back to Home
+        </Link>
+        <Link
+          href="center/signup"
+          className="text-blue-500 hover:underline mt-4"
+        >
+          Sign Up
+        </Link>
+
+        <Link
+          href="center/login"
+          className="text-blue-500 hover:underline mt-4"
+        >
+          Login
+        </Link>
       </main>
     </div>
   );
