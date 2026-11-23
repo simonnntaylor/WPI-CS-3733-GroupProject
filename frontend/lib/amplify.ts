@@ -6,9 +6,8 @@ console.log("Configuring Amplify with Cognito settings...");
 Amplify.configure({
   Auth: {
     Cognito: {
-      userPoolId: process.env.NEXT_PUBLIC_AMPLIFY_USER_POOL_ID as string,
-      userPoolClientId: process.env
-        .NEXT_PUBLIC_AMPLIFY_USER_POOL_CLIENT_ID as string,
+      userPoolId: "us-east-1_pu2srHftk",
+      userPoolClientId: "2g6o0gd8kfipknvuqkh7fd942m",
       loginWith: {
         username: true,
       },
