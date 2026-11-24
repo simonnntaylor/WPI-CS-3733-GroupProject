@@ -7,14 +7,13 @@ import React, { useEffect } from "react";
 import Link from "next/link";
 import {
   updatePassword,
+  GetCurrentUserOutput,
   getCurrentUser,
 } from "aws-amplify/auth";
-import { Amplify } from "aws-amplify";
 import { ChangePasswordForm } from "@/lib/auth";
-import { redirect } from "next/navigation";
 
 export default function ChangePassword() {
-  const [currentUser, setCurrentUser] = React.useState<any>(null);
+  const [currentUser, setCurrentUser] = React.useState<GetCurrentUserOutput | null>(null);
 
   const [changedPassword, setChangedPassword] = React.useState(false);
 
@@ -29,10 +28,12 @@ export default function ChangePassword() {
       .then(() => {
         alert("Password changed successfully!");
         form.reset();
+        setChangedPassword(true);
       })
       .catch((error) => {
         console.error("Error changing password:", error);
         alert("Error changing password: " + error.message);
+        setChangedPassword(false)
       });
   }
 

@@ -3,11 +3,10 @@
 // sent to and run in the user's browser
 import "../../lib/amplify";
 import "../../lib/auth";
-import { useEffect, useState, type SubmitEvent } from "react";
+import { useEffect, type SubmitEvent } from "react";
 import {
   signIn,
   confirmSignIn,
-  GetCurrentUserOutput,
   getCurrentUser,
 } from "aws-amplify/auth";
 import { SignInForm } from "../../lib/auth";
@@ -16,15 +15,12 @@ import { redirect } from "next/navigation";
 // AWS requires a new passwrod when you first sign in. How I delt with it was
 // found here: https://docs.amplify.aws/react/frontend/auth/multi-step-sign-in/?
 export default function Login() {
-  const [currentUser, setCurrentUser] = useState<GetCurrentUserOutput | null>(
-    null,
-  );
-
   useEffect(() => {
     async function fetchCurrentUser() {
       await getCurrentUser()
-        .catch((_) => {
+        .catch((user) => {
           // expecting user to be logged out
+          console.log("Current User:", user)
         })
         .then((user) => {
           if (user) {
