@@ -1,20 +1,23 @@
 // GET /donationCenter/showDashboard
-// Login required: the logged-in user must be in the DonationCenter group.
+// Login required (any logged-in user, group is NOT checked for now).
 // Request:  no body or URL inputs. WHO is asking comes from the Cognito login.
 // Response: everything the donation center dashboard page displays.
 
 import { query } from '../../shared/db';
-import { requireGroup } from '../../shared/auth';
+import { getUsername } from '../../shared/auth';
 import { ok, fail } from '../../shared/response';
 
 export const handler = async (event: any) => {
   // 1. Find out which center is asking.
-  //    API Gateway already checked the login. requireGroup reads who it is:
-  //    the center's name (its Cognito username), or null if the user isn't
-  //    in the DonationCenter group (e.g. an organization user).
-  const centerName = requireGroup(event, 'DonationCenter');
+  //    API Gateway already checked the login. getUsername reads who it is:
+  //    the center's name (its Cognito username).
+  //    TEMPORARY: group check turned off. To turn it back on, use
+  //      const centerName = requireGroup(event, 'DonationCenter');
+  //    (import requireGroup instead of getUsername) and
+  //    return fail('Only donation centers can view this dashboard', 403) if null.
+  const centerName = getUsername(event);
   if (!centerName) {
-    return fail('Only donation centers can view this dashboard', 403);
+    return fail('Not logged in', 401);
   }
 
   // TODO 2. Look up the center's info.
