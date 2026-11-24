@@ -13,7 +13,9 @@ export default function Organization() {
         <h1 className="text-4xl font-bold text-zinc-900 dark:text-zinc-100">
           Organization page
         </h1>
-        <Link href="/" className="text-blue-500 hover:underline mt-4">Go back to Home</Link>
+        <Link href="/" className="text-blue-500 hover:underline mt-4">
+          Go back to Home
+        </Link>
       </main>
     </div>
   );

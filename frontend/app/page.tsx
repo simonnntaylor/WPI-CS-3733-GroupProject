@@ -10,6 +10,11 @@ export default function Home() {
         </h1>
 
         <div className="flex flex-row items-center justify-center gap-3 mt-10">
+          <div className="bg-purple-500 rounded w-40 h-12 flex items-center justify-center hover:bg-purple-600 transition hover:scale-105">
+            <Link href="/login" className="text-white text-lg font-semibold">
+              Login
+            </Link>
+          </div>
           <div className="bg-red-500 rounded w-40 h-12 flex items-center justify-center hover:bg-red-600 transition hover:scale-105">
             <Link href="/organization" className="text-white text-lg font-semibold">
               Organization
