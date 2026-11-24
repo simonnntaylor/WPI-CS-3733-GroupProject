@@ -24,8 +24,22 @@ export default function CategoryManager() {
   }, []);
 
   useEffect(() => {
-    refresh();
-  }, [refresh]);
+  let cancelled = false;
+  listCategories()
+    .then((list) => {
+      if (!cancelled) setCategories(list);
+    })
+    .catch(() => {
+      if (!cancelled)
+        setStatus({ kind: "error", text: "Could not load categories. Try again." });
+    })
+    .finally(() => {
+      if (!cancelled) setLoading(false);
+    });
+  return () => {
+    cancelled = true;
+  };
+}, []);
 
   // Add Category
   async function handleAdd(e: React.SyntheticEvent) {
