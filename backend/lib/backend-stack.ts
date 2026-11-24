@@ -1,6 +1,7 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as cdk from 'aws-cdk-lib/core';
+import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as dsql from 'aws-cdk-lib/aws-dsql';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
@@ -51,15 +52,50 @@ export class BackendStack extends cdk.Stack {
     const schemaProvider = new cr.Provider(this, 'SchemaProvider', {
       onEventHandler: runSchemaFn,
     });
-    new cdk.CustomResource(this, 'Schema', {
+    const schema = new cdk.CustomResource(this, 'Schema', {
       serviceToken: schemaProvider.serviceToken,
       properties: {
         Sql: fs.readFileSync(path.join(__dirname, '../db/schema.sql'), 'utf8'),
       },
     });
 
+    // ---------------------------------------------------------------------
+    // Category API: Add Category, Remove Category, and List Categories.
+    // ---------------------------------------------------------------------
+    const categoryFn = (id: string, file: string) => {
+      const fn = new nodejs.NodejsFunction(this, id, {
+        entry: path.join(__dirname, `../lambda/${file}.ts`),
+        handler: 'handler',
+        runtime: lambda.Runtime.NODEJS_22_X,
+        timeout: cdk.Duration.seconds(15),
+        environment: { DB_ENDPOINT: this.dbEndpoint },
+        bundling: { externalModules: ['pg-native'] },
+      });
+      this.grantDbAccess(fn);
+      // Make sure the tables exist before the first request can arrive.
+      fn.node.addDependency(schema);
+      return fn;
+    };
+
+    const addCategoryFn = categoryFn('AddCategoryFunction', 'addCategory');
+    const removeCategoryFn = categoryFn('RemoveCategoryFunction', 'removeCategory');
+    const listCategoriesFn = categoryFn('ListCategoriesFunction', 'listCategories');
+
+    const api = new apigateway.RestApi(this, 'DonazionApi', {
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigateway.Cors.ALL_ORIGINS,
+        allowMethods: ['GET', 'POST', 'OPTIONS'],
+        allowHeaders: ['Content-Type', 'Authorization'],
+      },
+    });
+
+    api.root.addResource('addCategory').addMethod('POST', new apigateway.LambdaIntegration(addCategoryFn));
+    api.root.addResource('removeCategory').addMethod('POST', new apigateway.LambdaIntegration(removeCategoryFn));
+    api.root.addResource('listCategories').addMethod('GET', new apigateway.LambdaIntegration(listCategoriesFn));
+
     // Printed after `cdk deploy`, handy for connecting with psql.
     new cdk.CfnOutput(this, 'DatabaseEndpoint', { value: this.dbEndpoint });
+     new cdk.CfnOutput(this, 'ApiUrl', { value: api.url });
   }
 
   // Lets a Lambda connect to the database as the admin user.
