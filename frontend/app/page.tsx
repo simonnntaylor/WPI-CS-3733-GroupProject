@@ -1,23 +1,33 @@
 "use client";
-import Image from "next/image";
 import Link from "next/link";
 import "../lib/auth";
 import "../lib/amplify";
 
 import { useState, useEffect } from "react";
-import { getCurrentUser, signOut } from "aws-amplify/auth";
+import {
+  getCurrentUser,
+  signOut,
+  GetCurrentUserOutput,
+} from "aws-amplify/auth";
 
 export default function Home() {
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<GetCurrentUserOutput | null>(
+    null,
+  );
 
   useEffect(() => {
     async function fetchCurrentUser() {
-      try {
-        const user = await getCurrentUser();
-        setCurrentUser(user);
-      } catch (error) {
-        console.log("Not logged in");
-      }
+      await getCurrentUser()
+        .catch((error) => {
+          if (error.name === "NotAuthorizedException") {
+            console.log("Not logged in");
+          } else {
+            console.error("Error fetching current user:", error);
+          }
+        })
+        .then((user) => {
+          if (user) setCurrentUser(user);
+        });
     }
 
     fetchCurrentUser();

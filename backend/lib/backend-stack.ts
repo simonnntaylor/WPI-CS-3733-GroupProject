@@ -2,6 +2,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as cdk from 'aws-cdk-lib/core';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
+import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as dsql from 'aws-cdk-lib/aws-dsql';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
@@ -15,6 +16,8 @@ export class BackendStack extends cdk.Stack {
   //   and given permission with this.grantDbAccess(myFunction)
   public readonly dbCluster: dsql.CfnCluster;
   public readonly dbEndpoint: string;
+  public readonly api: apigateway.RestApi;
+  private readonly authorizer: apigateway.CognitoUserPoolsAuthorizer;
 
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -95,7 +98,85 @@ export class BackendStack extends cdk.Stack {
 
     // Printed after `cdk deploy`, handy for connecting with psql.
     new cdk.CfnOutput(this, 'DatabaseEndpoint', { value: this.dbEndpoint });
-     new cdk.CfnOutput(this, 'ApiUrl', { value: api.url });
+
+    // ---------------------------------------------------------------------
+    // API: one REST API that the frontend calls.
+    // - CORS allows any website for now (tighten before the final demo).
+    // - Login uses the team's existing Cognito user pool (made in the AWS
+    //   Console, not by CDK). The stack must deploy to us-east-1, same as
+    //   the pool.
+    // ---------------------------------------------------------------------
+    this.api = new apigateway.RestApi(this, 'Api', {
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigateway.Cors.ALL_ORIGINS,
+        allowMethods: apigateway.Cors.ALL_METHODS,
+      },
+    });
+
+    // When API Gateway itself rejects a request (e.g. 401 not logged in), add
+    // the CORS header so the browser shows the real error, not a CORS error.
+    for (const type of [apigateway.ResponseType.DEFAULT_4XX, apigateway.ResponseType.DEFAULT_5XX]) {
+      this.api.addGatewayResponse(`Cors${type.responseType}`, {
+        type,
+        responseHeaders: { 'Access-Control-Allow-Origin': "'*'" },
+      });
+    }
+
+    const userPool = cognito.UserPool.fromUserPoolId(this, 'UserPool', 'us-east-1_pu2srHftk');
+    this.authorizer = new apigateway.CognitoUserPoolsAuthorizer(this, 'Authorizer', {
+      cognitoUserPools: [userPool],
+    });
+
+    // ---------------------------------------------------------------------
+    // Endpoints. URLs are grouped by actor:
+    //   /organization/...    Organization users (login required)
+    //   /donationCenter/...  Donation center users (login required)
+    //   /donor/...           anyone (no login)
+    // GET for reads (inputs in the URL), POST for changes (inputs in the body).
+    // Add yours here, e.g.:
+    //   this.addEndpoint('GET', 'donationCenter/showDashboard',
+    //                    'lambda/donationCenter/showDashboard/index.ts');
+    // ---------------------------------------------------------------------
+    this.addEndpoint('GET', 'whoami', 'lambda/whoami/index.ts');
+    this.addEndpoint('GET', 'donationCenter/showDashboard', 'lambda/donationCenter/showDashboard/index.ts');
+    this.addEndpoint('GET', 'organization/showDashboard', 'lambda/organization/showDashboard/index.ts');
+
+    // Printed after `cdk deploy`. The frontend needs this URL.
+    new cdk.CfnOutput(this, 'ApiUrl', { value: this.api.url });
+  }
+
+  // Creates a Lambda from `entry` and connects it to the API at `urlPath`.
+  // Every endpoint gets database access. Login is required unless the path
+  // starts with "donor/" or requireLogin is false.
+  public addEndpoint(
+    method: 'GET' | 'POST',
+    urlPath: string,
+    entry: string,
+    requireLogin = !urlPath.startsWith('donor/'),
+  ) {
+    // e.g. 'donationCenter/showDashboard' -> 'DonationCenterShowDashboard'
+    const id = urlPath
+      .split(/[/-]/)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join('');
+
+    const fn = new nodejs.NodejsFunction(this, `${id}Function`, {
+      entry: path.join(__dirname, '..', entry),
+      runtime: lambda.Runtime.NODEJS_22_X,
+      timeout: cdk.Duration.seconds(30),
+      environment: { DB_ENDPOINT: this.dbEndpoint },
+      bundling: { externalModules: ['pg-native'] },
+    });
+    this.grantDbAccess(fn);
+
+    this.api.root.resourceForPath(urlPath).addMethod(
+      method,
+      new apigateway.LambdaIntegration(fn),
+      requireLogin
+        ? { authorizer: this.authorizer, authorizationType: apigateway.AuthorizationType.COGNITO }
+        : {},
+    );
+    return fn;
   }
 
   // Lets a Lambda connect to the database as the admin user.
