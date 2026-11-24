@@ -15,11 +15,6 @@ export default function Home() {
               Login
             </Link>
           </div>
-          <div className="bg-emerald-500 rounded w-40 h-12 flex items-center justify-center hover:bg-emerald-600 transition hover:scale-105">
-            <Link href="/signup" className="text-white text-lg font-semibold">
-              Sign Up
-            </Link>
-          </div>
         </div>
         <div className="flex flex-row items-center justify-center gap-3 mt-3 flex-wrap mt-10">
           <div className="bg-red-500 rounded w-40 h-12 flex items-center justify-center hover:bg-red-600 transition hover:scale-105">

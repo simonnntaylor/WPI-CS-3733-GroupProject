@@ -16,6 +16,9 @@ export default function Organization() {
         <Link href="/" className="text-blue-500 hover:underline mt-4">
           Go back to Home
         </Link>
+        <Link href="organization/signup" className="text-blue-500 hover:underline mt-4">
+          Create Organization Account
+        </Link>
       </main>
     </div>
   );
