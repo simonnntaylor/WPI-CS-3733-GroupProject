@@ -33,6 +33,11 @@ jobs:
           NEXT_PUBLIC_AMPLIFY_USER_POOL_ID: ${{ vars.USER_POOL_ID }}
           NEXT_PUBLIC_AMPLIFY_USER_POOL_CLIENT_ID: ${{ vars.USER_POOL_CLIENT_ID }}
 
+      - name: Debug OIDC claims
+        uses: github/actions-oidc-debugger@main
+        with:
+          audience: sts.amazonaws.com
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
