@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from 'next/link';
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -9,9 +9,24 @@ export default function Home() {
           Welcome to Donazion!
         </h1>
 
-        <div className="flex flex-row items-center justify-center gap-3 mt-10">
+        <div className="flex flex-row items-center justify-center gap-3 mt-10 flex-wrap">
+          <div className="bg-purple-500 rounded w-40 h-12 flex items-center justify-center hover:bg-purple-600 transition hover:scale-105">
+            <Link href="/login" className="text-white text-lg font-semibold">
+              Login
+            </Link>
+          </div>
+          <div className="bg-emerald-500 rounded w-40 h-12 flex items-center justify-center hover:bg-emerald-600 transition hover:scale-105">
+            <Link href="/signup" className="text-white text-lg font-semibold">
+              Sign Up
+            </Link>
+          </div>
+        </div>
+        <div className="flex flex-row items-center justify-center gap-3 mt-3 flex-wrap mt-10">
           <div className="bg-red-500 rounded w-40 h-12 flex items-center justify-center hover:bg-red-600 transition hover:scale-105">
-            <Link href="/organization" className="text-white text-lg font-semibold">
+            <Link
+              href="/organization"
+              className="text-white text-lg font-semibold"
+            >
               Organization
             </Link>
           </div>

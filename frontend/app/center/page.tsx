@@ -22,13 +22,6 @@ export default function Center() {
         >
           Sign Up
         </Link>
-
-        <Link
-          href="center/login"
-          className="text-blue-500 hover:underline mt-4"
-        >
-          Login
-        </Link>
       </main>
     </div>
   );
