@@ -1,107 +1,74 @@
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import * as cdk from 'aws-cdk-lib/core';
-import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as dsql from 'aws-cdk-lib/aws-dsql';
+import * as iam from 'aws-cdk-lib/aws-iam';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as nodejs from 'aws-cdk-lib/aws-lambda-nodejs';
+import * as cr from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 
 export class BackendStack extends cdk.Stack {
-  // The tables are public so Lambdas defined later in this file can be
-  // given access, e.g. this.donationCenters.grantReadData(myFunction)
-  public readonly organizations: dynamodb.TableV2;
-  public readonly donationCenters: dynamodb.TableV2;
-  public readonly categories: dynamodb.TableV2;
-  public readonly categoryItems: dynamodb.TableV2;
-  public readonly inventory: dynamodb.TableV2;
-  public readonly wishList: dynamodb.TableV2;
-  public readonly boxes: dynamodb.TableV2;
+  // Public so Lambdas defined later can be pointed at the database:
+  //   environment: { DB_ENDPOINT: this.dbEndpoint }
+  //   and given permission with this.grantDbAccess(myFunction)
+  public readonly dbCluster: dsql.CfnCluster;
+  public readonly dbEndpoint: string;
 
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     // ---------------------------------------------------------------------
-    // DynamoDB tables. See db/schema.sql for every table's fields.
-    //
-    // Settings shared by every table:
-    // - On-demand billing: pay per request, no capacity to manage.
-    // - DESTROY: `cdk destroy` deletes the tables and their data too.
-    // - No tableName: CDK generates a unique name, so teammates can each
-    //   deploy their own copy. Lambdas get the real names via env variables.
+    // Database: one Aurora DSQL cluster (PostgreSQL-compatible, serverless).
+    // - No VPC and no password: Lambdas connect with IAM tokens.
+    // - Deletion protection off + DESTROY: `cdk destroy` deletes the cluster
+    //   and its data too.
     // ---------------------------------------------------------------------
-    const shared = {
-      billing: dynamodb.Billing.onDemand(),
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-    };
-    const str = dynamodb.AttributeType.STRING;
+    this.dbCluster = new dsql.CfnCluster(this, 'Database', {
+      deletionProtectionEnabled: false,
+    });
+    this.dbCluster.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
+    this.dbEndpoint = this.dbCluster.attrEndpoint;
 
-    // The one organization. Key matches its Cognito username.
-    this.organizations = new dynamodb.TableV2(this, 'Organizations', {
-      ...shared,
-      partitionKey: { name: 'username', type: str },
+    // ---------------------------------------------------------------------
+    // Tables: CDK can't create tables inside DSQL, so a small setup Lambda
+    // (db/runSchema.ts) runs db/schema.sql during deploy. Because the SQL is
+    // passed in as a property, editing schema.sql makes it run again.
+    // ---------------------------------------------------------------------
+    const runSchemaFn = new nodejs.NodejsFunction(this, 'RunSchemaFunction', {
+      entry: path.join(__dirname, '../db/runSchema.ts'),
+      runtime: lambda.Runtime.NODEJS_22_X,
+      timeout: cdk.Duration.minutes(5),
+      environment: { DB_ENDPOINT: this.dbEndpoint },
+      bundling: {
+        // Bundle everything (the DSQL signer isn't built into Lambda).
+        // pg-native is an optional add-on to pg that we don't use.
+        externalModules: ['pg-native'],
+      },
+    });
+    this.grantDbAccess(runSchemaFn);
+
+    const schemaProvider = new cr.Provider(this, 'SchemaProvider', {
+      onEventHandler: runSchemaFn,
+    });
+    new cdk.CustomResource(this, 'Schema', {
+      serviceToken: schemaProvider.serviceToken,
+      properties: {
+        Sql: fs.readFileSync(path.join(__dirname, '../db/schema.sql'), 'utf8'),
+      },
     });
 
-    // Donation centers. Key matches the center's Cognito username, and makes
-    // names unique. Also stores running totalItems / totalValue.
-    this.donationCenters = new dynamodb.TableV2(this, 'DonationCenters', {
-      ...shared,
-      partitionKey: { name: 'name', type: str },
-    });
+    // Printed after `cdk deploy`, handy for connecting with psql.
+    new cdk.CfnOutput(this, 'DatabaseEndpoint', { value: this.dbEndpoint });
+  }
 
-    // Categories, e.g. "Clothing".
-    this.categories = new dynamodb.TableV2(this, 'Categories', {
-      ...shared,
-      partitionKey: { name: 'categoryName', type: str },
-    });
-
-    // Items in each category with a price range, e.g. Clothing / Shoes.
-    // Query by categoryName to get every item in a category.
-    this.categoryItems = new dynamodb.TableV2(this, 'CategoryItems', {
-      ...shared,
-      partitionKey: { name: 'categoryName', type: str },
-      sortKey: { name: 'itemName', type: str },
-    });
-
-    // What each center has. One row per donated line (separate rows even for
-    // the same item name, since donors set their own prices).
-    // Query by centerName to get a center's whole inventory.
-    this.inventory = new dynamodb.TableV2(this, 'Inventory', {
-      ...shared,
-      partitionKey: { name: 'centerName', type: str },
-      sortKey: { name: 'itemId', type: str },
-    });
-
-    // Which categories each center wants. Query by centerName for a center's
-    // wish list, or use the byCategory index to find every center wanting a
-    // category (/searchDonationCenters).
-    this.wishList = new dynamodb.TableV2(this, 'WishList', {
-      ...shared,
-      partitionKey: { name: 'centerName', type: str },
-      sortKey: { name: 'categoryName', type: str },
-      globalSecondaryIndexes: [
-        {
-          indexName: 'byCategory',
-          partitionKey: { name: 'categoryName', type: str },
-          sortKey: { name: 'centerName', type: str },
-        },
-      ],
-    });
-
-    // Donor boxes. Contents are stored as a list inside the row.
-    this.boxes = new dynamodb.TableV2(this, 'Boxes', {
-      ...shared,
-      partitionKey: { name: 'boxId', type: str },
-    });
-
-    // Print the generated table names after `cdk deploy`, so they're easy
-    // to find in the AWS Console.
-    const tables = {
-      OrganizationsTable: this.organizations,
-      DonationCentersTable: this.donationCenters,
-      CategoriesTable: this.categories,
-      CategoryItemsTable: this.categoryItems,
-      InventoryTable: this.inventory,
-      WishListTable: this.wishList,
-      BoxesTable: this.boxes,
-    };
-    for (const [outputName, table] of Object.entries(tables)) {
-      new cdk.CfnOutput(this, outputName, { value: table.tableName });
-    }
+  // Lets a Lambda connect to the database as the admin user.
+  public grantDbAccess(fn: lambda.IFunction) {
+    fn.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ['dsql:DbConnectAdmin'],
+        resources: [this.dbCluster.attrResourceArn],
+      }),
+    );
   }
 }
