@@ -27,6 +27,7 @@ export default function App() {
       options: {
         userAttributes: {
             email: form.elements.email.value,
+            "custom:accountType": "DonationCenter",
         },
       },
     })
