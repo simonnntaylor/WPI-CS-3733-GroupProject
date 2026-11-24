@@ -105,6 +105,7 @@ export class BackendStack extends cdk.Stack {
     // ---------------------------------------------------------------------
     this.addEndpoint('GET', 'whoami', 'lambda/whoami/index.ts');
     this.addEndpoint('GET', 'donationCenter/showDashboard', 'lambda/donationCenter/showDashboard/index.ts');
+    this.addEndpoint('GET', 'organization/showDashboard', 'lambda/organization/showDashboard/index.ts');
 
     // Printed after `cdk deploy`. The frontend needs this URL.
     new cdk.CfnOutput(this, 'ApiUrl', { value: this.api.url });
