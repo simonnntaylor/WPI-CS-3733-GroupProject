@@ -1,112 +1,87 @@
-// POST /donationCenter/showDashboard
-// Request:  { "token": "..." }
+// GET /donationCenter/showDashboard
+// Login required: the logged-in user must be in the DonationCenter group.
+// Request:  no body or URL inputs. WHO is asking comes from the Cognito login.
 // Response: everything the donation center dashboard page displays.
 
-// TODO: replace this placeholder with the real query function from the
-//       database branch once it's merged, e.g.
-//       import { query } from "../../shared/db";
-//       It should run one SQL statement (with ? placeholders filled from
-//       `params`) and return the rows.
-async function query(sql: string, params: unknown[] = []): Promise<any[]> {
-  throw new Error("Database not connected yet");
-}
+import { query } from '../../shared/db';
+import { requireGroup } from '../../shared/auth';
+import { ok, fail } from '../../shared/response';
 
-// Reply helpers so success and error replies look the same.
-// The headers let the frontend website call this API (CORS).
-const headers = {
-  "Content-Type": "application/json",
-  "Access-Control-Allow-Origin": "*",
-};
-function ok(body: object) {
-  return { statusCode: 200, headers, body: JSON.stringify(body) };
-}
-function fail(error: string) {
-  return { statusCode: 400, headers, body: JSON.stringify({ error }) };
-}
-
-export const handler = async (event: { body?: string | null }) => {
-  // 1. Read the request.
-  //    event.body is a STRING of JSON, like '{"token":"abc123"}'
-  let token: unknown;
-  try {
-    token = JSON.parse(event.body ?? "{}").token;
-  } catch {
-    return fail("Request body must be valid JSON");
+export const handler = async (event: any) => {
+  // 1. Find out which center is asking.
+  //    API Gateway already checked the login. requireGroup reads who it is:
+  //    the center's name (its Cognito username), or null if the user isn't
+  //    in the DonationCenter group (e.g. an organization user).
+  const centerName = requireGroup(event, 'DonationCenter');
+  if (!centerName) {
+    return fail('Only donation centers can view this dashboard', 403);
   }
 
-  // 2. Check the token.
-  //    No token, or no matching unexpired token = not logged in.
-  if (typeof token !== "string" || token === "") {
-    return fail("Invalid or expired token");
-  }
-  const tokenRows = await query(
-    "select donation_center_id from donation_center_tokens where token = ? and expires_at > now()",
-    [token]
-  );
-  if (tokenRows.length === 0) {
-    return fail("Invalid or expired token");
-  }
-  const centerId = tokenRows[0].donation_center_id;
-
-  // 3. Look up the donation center's info (name and address).
-  //    "left join" so a center with no address still shows up.
+  // TODO 2. Look up the center's info.
+  //   - Table: donation_centers. Columns: name, street_address, latitude, longitude.
+  //   - Filter with WHERE name = $1 and pass [centerName] as the params.
+  //   - query() returns an array of rows. If it's empty, return
+  //     fail('Donation center not found', 404).
   const centerRows = await query(
-    `select dc.name, a.address_line_1, a.city, a.region, a.postal_code
-       from donation_centers dc
-       left join addresses a on dc.address_id = a.id
-      where dc.id = ?`,
-    [centerId]
+    'SELECT name, street_address, latitude, longitude FROM donation_centers WHERE name = $1',
+    [centerName]
   );
   if (centerRows.length === 0) {
-    return fail("Donation center does not exist");
+    return fail('Donation center not found', 404);
   }
-  const center = centerRows[0];
+  const centerInfo = centerRows[0];
 
-  // 4. Look up that center's inventory items, and its wish list
-  //    (the two panels on the dashboard).
+  // TODO 3. Look up the center's inventory.
+  //   - Table: inventory_items. Columns: id, category_name, item_name, price, quantity.
+  //   - WHERE center_name = $1. Add ORDER BY so the list has a stable order.
   const inventoryRows = await query(
-    `select i.name, i.price, c.name as category
-       from inventory_items inv
-       join items i                on inv.item_id = i.id
-       left join category_items ci on i.category_item_id = ci.id
-       left join categories c      on ci.category_id = c.id
-      where inv.donation_center_id = ?
-      order by i.name`,
-    [centerId]
+    'SELECT id, category_name, item_name, price, quantity FROM inventory_items WHERE center_name = $1 ORDER BY category_name, item_name',
+    [centerName]
   );
+
+  // TODO 4. Look up the center's wish list.
+  //   - Table: wish_list. Column: category_name (whole categories, no items).
+  //   - WHERE center_name = $1, ORDER BY category_name.
   const wishListRows = await query(
-    `select ci.name, c.name as category
-       from wishlist_items w
-       join category_items ci on w.category_item_id = ci.id
-       join categories c      on ci.category_id = c.id
-      where w.donation_center_id = ?
-      order by c.name, ci.name`,
-    [centerId]
+    'SELECT category_name FROM wish_list WHERE center_name = $1 ORDER BY category_name',
+    [centerName]
   );
 
-  // MySQL returns decimal columns as text (like "12.50"), so turn prices into numbers.
-  const inventory = inventoryRows.map((row) => ({
-    name: row.name,
-    category: row.category,
-    price: row.price === null ? null : Number(row.price),
-  }));
+  // TODO 5. Calculate the totals ("Total Items" and "Total Value" on the page).
+  //   - Either in SQL:
+  //       SELECT SUM(quantity) AS total_items, SUM(price * quantity) AS total_value
+  //       FROM inventory_items WHERE center_name = $1
+  //     (SUM returns null when there are no rows, so use ?? 0)
+  //   - pg returns numeric/SUM values as STRINGS ("15.00"): wrap them in Number().
+  const totalsRow = await query(
+    'SELECT COALESCE(SUM(quantity), 0) AS total_items, COALESCE(SUM(price * quantity), 0) AS total_value FROM inventory_items WHERE center_name = $1',
+    [centerName]
+  );
+  const totals = totalsRow[0];
+  const totalItems = Number(totals.total_items);
+  const totalValue = Number(totals.total_value); 
 
-  // 5. Calculate the summary numbers ("Total Items" and "Total Value" in the Figma).
-  const totalItems = inventory.length;
-  const totalValue = inventory.reduce((sum, item) => sum + (item.price ?? 0), 0);
-
-  // 6. Send it back.
+  // TODO 6. Send it back with ok({ ... }).
+  //   - Agree on the field names with frontend/app/center/page.tsx, e.g.
+  //     { name, address, wishList, inventory, totalItems, totalValue }
+  //   - Convert prices with Number(row.price) before sending.
   return ok({
-    name: center.name,
-    address: {
-      line1: center.address_line_1,
-      city: center.city,
-      region: center.region,
-      postalCode: center.postal_code,
-    },
-    wishList: wishListRows.map((row) => ({ name: row.name, category: row.category })),
-    inventory,
+    name: centerInfo.name,
+    address: centerInfo.street_address,
+    latitude: centerInfo.latitude == null ? null : Number(centerInfo.latitude),
+    longitude: centerInfo.longitude == null ? null : Number(centerInfo.longitude),
+    wishList: wishListRows.map((row) => row.category_name),
+    inventory: inventoryRows.map((row) => ({
+      id: row.id,
+      category: row.category_name,
+      name: row.item_name,
+      price: Number(row.price),
+      quantity: Number(row.quantity),
+    })),
     totalItems,
-    totalValue: Math.round(totalValue * 100) / 100, // round to cents
+    totalValue,
   });
+
+  
+
 };
