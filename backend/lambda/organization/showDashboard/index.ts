@@ -3,7 +3,8 @@
 // Request:  no body or URL inputs.
 // Response: everything the organization dashboard page displays:
 //   - every donation center, with its total items and total $ value
-//   - every category, with how many items it has
+//   - every category, with how many items it has and the items themselves
+//     (name + low/high price), for the category dropdowns
 
 import { query } from '../../shared/db';
 import { getUsername } from '../../shared/auth';
@@ -46,7 +47,28 @@ export const handler = async (event: any) => {
       ORDER BY c.name`
   );
 
-  // 4. Send it back. pg returns numeric/SUM/COUNT values as strings
+  // 4. Every category item, so the page can show them when a category's
+  //    arrow is clicked (e.g. Clothing -> Jacket $10-$40, Shoes $5-$30).
+  const itemRows = await query(
+    `SELECT category_name, item_name, low_price, high_price
+       FROM category_items
+      ORDER BY category_name, item_name`
+  );
+
+  // Group the items by category: { Clothing: [...], Toys: [...] }
+  const itemsByCategory: Record<string, { name: string; lowPrice: number; highPrice: number }[]> = {};
+  for (const row of itemRows) {
+    if (!itemsByCategory[row.category_name]) {
+      itemsByCategory[row.category_name] = [];
+    }
+    itemsByCategory[row.category_name].push({
+      name: row.item_name,
+      lowPrice: Number(row.low_price),
+      highPrice: Number(row.high_price),
+    });
+  }
+
+  // 5. Send it back. pg returns numeric/SUM/COUNT values as strings
   //    ("15", "176.00"), so convert them with Number().
   return ok({
     centers: centerRows.map((row) => ({
@@ -60,6 +82,7 @@ export const handler = async (event: any) => {
     categories: categoryRows.map((row) => ({
       name: row.name,
       itemCount: Number(row.item_count),
+      items: itemsByCategory[row.name] ?? [], // [] if the category has no items yet
     })),
   });
 };
