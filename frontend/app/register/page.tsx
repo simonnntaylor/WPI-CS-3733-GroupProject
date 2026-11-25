@@ -1,13 +1,15 @@
 "use client";
 import type { SubmitEvent } from "react"
 import { Amplify } from "aws-amplify"
-import { signUp, confirmSignUp } from "aws-amplify/auth"
+import { signUp, confirmSignUp, signIn } from "aws-amplify/auth"
+import { apiPost } from "@/lib/api";
 import "@/lib/amplify";
 
 interface SignUpFormElements extends HTMLFormControlsCollection {
   username: HTMLInputElement
   email: HTMLInputElement
   password: HTMLInputElement
+  address: HTMLInputElement;
 }
 
 interface SignUpForm extends HTMLFormElement {
@@ -39,6 +41,15 @@ export default function App() {
     await confirmSignUp({
       username: form.elements.username.value,
       confirmationCode: code,
+    });
+    
+    await signIn({
+    username: form.elements.username.value,
+    password: form.elements.password.value
+    });
+
+    await apiPost("donationCenter/register", {
+        address: form.elements.address.value
     });
   }
 
@@ -83,6 +94,19 @@ export default function App() {
             name="email"
             className="text-zinc-900 dark:text-zinc-100 bg-zinc-200 dark:bg-zinc-800 border border-zinc-400 dark:border-zinc-600 rounded px-2 py-1"
           />
+        <label
+            htmlFor="Address"
+            className="text-zinc-900 dark:text-zinc-100 hover:animate-bounce font-bold"
+          >
+            Address:
+          </label>
+          <input
+            type="text"
+            id="address"
+            name="address"
+            className="text-zinc-900 dark:text-zinc-100 bg-zinc-200 dark:bg-zinc-800 border border-zinc-400 dark:border-zinc-600 rounded px-2 py-1"
+          />
+
 
           <input
             type="submit"
