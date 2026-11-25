@@ -49,7 +49,6 @@ export default function Home() {
         <h1 className="text-4xl font-bold text-zinc-900 dark:text-zinc-100">
           Welcome to Donazion!
         </h1>
-
         {currentUser ? (
           <>
             <p className="text-zinc-900 dark:text-zinc-100 mt-4">
