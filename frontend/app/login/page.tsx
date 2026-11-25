@@ -1,51 +1,80 @@
 "use client";
-//tells the bundler that the module and everything imported into it should be sent to and run in the user's browser
+// tells the bundler that the module and everything imported into it should be
+// sent to and run in the user's browser
 import "../../lib/amplify";
 import "../../lib/auth";
-import type { SubmitEvent } from "react";
-import { signIn, confirmSignIn } from "aws-amplify/auth";
+import { useEffect, type SubmitEvent } from "react";
+import {
+  signIn,
+  confirmSignIn,
+  getCurrentUser,
+} from "aws-amplify/auth";
 import { SignInForm } from "../../lib/auth";
+import { redirect } from "next/navigation";
 
-//AWS requires a new passwrod when you first sign in. How I delt with it was found here: https://docs.amplify.aws/react/frontend/auth/multi-step-sign-in/?
+// AWS requires a new passwrod when you first sign in. How I delt with it was
+// found here: https://docs.amplify.aws/react/frontend/auth/multi-step-sign-in/?
 export default function Login() {
+  useEffect(() => {
+    async function fetchCurrentUser() {
+      await getCurrentUser()
+        .catch((user) => {
+          // expecting user to be logged out
+          console.log("Current User:", user)
+        })
+        .then((user) => {
+          if (user) {
+            alert("You are already signed in");
+            redirect("/");
+          }
+        });
+    }
+
+    fetchCurrentUser();
+  }, []);
   async function handleSubmit(event: SubmitEvent<SignInForm>) {
     event.preventDefault();
     const form = event.currentTarget;
     // ... validate inputs
-    try {
-      const result = await signIn({
-        username: form.elements.username.value,
-        password: form.elements.password.value,
+    await signIn({
+      username: form.elements.username.value,
+      password: form.elements.password.value,
+    })
+      .catch((error) => {
+        if (error.name === "UserNotFoundException") {
+          alert("User not found. Please check your username.");
+        } else if (error.name === "NotAuthorizedException") {
+          alert("Incorrect password. Please try again.");
+        } else {
+          console.error("Error signing in:", error);
+        }
+      })
+      .then(async (result) => {
+        if (!result) return;
+        if (
+          result.nextStep.signInStep ===
+          "CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED"
+        ) {
+          const newPassword = prompt("Enter a new permanent password:");
+
+          if (!newPassword) return;
+
+          const confirmResult = await confirmSignIn({
+            challengeResponse: newPassword,
+          });
+
+          console.log("Password change result:", confirmResult);
+        } else if (
+          result.nextStep.signInStep === "CONTINUE_SIGN_IN_WITH_EMAIL_SETUP"
+        ) {
+          // Handle email setup step if needed
+          // You can prompt the user to set up their email or perform any
+          // necessary actions here
+        } else if (result.nextStep.signInStep === "DONE") {
+          console.log("Login successful!");
+          redirect("/");
+        }
       });
-      if (
-        result.nextStep.signInStep ===
-        "CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED"
-      ) {
-        const newPassword = prompt("Enter a new permanent password:");
-
-        if (!newPassword) return;
-        const email = prompt("Enter your email address:");
-        if (email === null) return;
-
-        const confirmResult = await confirmSignIn({
-          challengeResponse: newPassword,
-          options: {
-            userAttributes: {
-              email: email,
-            },
-          },
-        });
-
-        console.log("Password change result:", confirmResult);
-      } else if (result.nextStep.signInStep === "CONTINUE_SIGN_IN_WITH_EMAIL_SETUP") {
-        // Handle email setup step if needed
-        // You can prompt the user to set up their email or perform any necessary actions here
-      } else if (result.nextStep.signInStep === "DONE") {
-        console.log("Login successful!");
-      }
-    } catch (NoAuthorizationException) {
-      alert("Invalid username or password. Please try again.");
-    }
   }
 
   return (
