@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
     agentUpgrade: "security",
   },
   output: "export",
+  trailingSlash: true,
   // cacheComponents: true,
   // partialPrefetching: true,
   turbopack: {
