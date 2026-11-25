@@ -102,6 +102,11 @@ export default function Home() {
             </Link>
           </div>
         </div>
+        <div className="bg-purple-500 rounded w-40 h-12 flex items-center justify-center hover:bg-black-600 transition hover:scale-105 mt-4">
+          <Link href="/register" className="text-white text-lg font-semibold">
+            Register
+          </Link>
+        </div>
       </main>
     </div>
   );
