@@ -1,5 +1,5 @@
 "use client";
-import type { FormEvent } from "react"
+import type { SubmitEvent } from "react"
 import { Amplify } from "aws-amplify"
 import { signUp, confirmSignUp } from "aws-amplify/auth"
 import "@/lib/amplify";
@@ -15,7 +15,7 @@ interface SignUpForm extends HTMLFormElement {
 }
 
 export default function App() {
-  async function handleSubmit(event: FormEvent<SignUpForm>) {
+  async function handleSubmit(event: SubmitEvent<SignUpForm>) {
     event.preventDefault()
     const form = event.currentTarget
     // ... validate inputs
@@ -36,9 +36,9 @@ export default function App() {
 
     if (code === null) return;
 
-    const result = await confirmSignUp({
-    username: form.elements.username.value,
-    confirmationCode: code,
+    await confirmSignUp({
+      username: form.elements.username.value,
+      confirmationCode: code,
     });
   }
 
