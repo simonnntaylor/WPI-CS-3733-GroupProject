@@ -6,7 +6,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { apiGet } from "@/lib/api";
+import { apiGet, apiPost } from "@/lib/api";
 
 // What GET /organization/showDashboard sends back. Must match the ok({...})
 // in backend/lambda/organization/showDashboard/index.ts.
@@ -69,6 +69,12 @@ export default function Organization() {
   const [data, setData] = useState<OrgDashboard | null>(null);
   const [error, setError] = useState("");
 
+  // Add/remove category: the name typed in the box, a success/error message
+  // to show under it, and `busy` to disable the buttons while a request runs.
+  const [newCategory, setNewCategory] = useState("");
+  const [categoryMessage, setCategoryMessage] = useState<{ ok: boolean; text: string } | null>(null);
+  const [busy, setBusy] = useState(false);
+
   // Fetch the dashboard once when the page first loads. The empty [] at the
   // end means "run once", not on every re-render.
   useEffect(() => {
@@ -76,6 +82,44 @@ export default function Organization() {
       .then(setData)
       .catch((e: Error) => setError(e.message));
   }, []);
+
+  // Re-fetch the dashboard after a change, so the lists and counts update.
+  async function reload() {
+    setData(await apiGet<OrgDashboard>("organization/showDashboard"));
+  }
+
+  // Add Category: POST /organization/addCategory { name }
+  async function handleAddCategory(e: React.SyntheticEvent) {
+    e.preventDefault(); // stop the form from reloading the page
+    setBusy(true);
+    try {
+      const res = await apiPost<{ message: string }>("organization/addCategory", { name: newCategory });
+      setCategoryMessage({ ok: true, text: res.message });
+      setNewCategory("");
+      await reload();
+    } catch (err) {
+      // e.g. "Category already exists" or "Category name can't be an empty string"
+      setCategoryMessage({ ok: false, text: (err as Error).message });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // Remove Category: POST /organization/removeCategory { name }
+  async function handleRemoveCategory(name: string) {
+    if (!confirm(`Remove the "${name}" category and all of its items?`)) return;
+    setBusy(true);
+    try {
+      const res = await apiPost<{ message: string }>("organization/removeCategory", { name });
+      setCategoryMessage({ ok: true, text: res.message });
+    } catch (err) {
+      // e.g. "Category is in use by inventory or boxes and cannot be removed"
+      setCategoryMessage({ ok: false, text: (err as Error).message });
+    } finally {
+      await reload(); // refresh either way, in case the list changed
+      setBusy(false);
+    }
+  }
 
   // e.g. "Unauthorized" if nobody is logged in.
   if (error) return <StatusScreen message={error} />;
@@ -115,14 +159,52 @@ export default function Organization() {
                     <Image src="/organization/chevron-right.svg" alt="" width={22} height={22} unoptimized />
                     {category.itemCount} {category.itemCount === 1 ? "Item" : "Items"}
                   </p>
-                  {/* BUTTON (pencil): edit this category.
-                      Backend: categories are their own use case (not built yet). */}
+                  {/* BUTTON (pencil): edit this category's items.
+                      Backend: category items are their own use case (not built yet). */}
                   <button type="button" aria-label={`Edit ${category.name}`} className="absolute right-3 top-4">
                     <Image src="/organization/pencil-25.svg" alt="" width={25} height={25} unoptimized />
+                  </button>
+                  {/* BUTTON (Remove): Remove Category use case.
+                      Not in the Figma frame, added so the use case can be done. */}
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => handleRemoveCategory(category.name)}
+                    className="absolute right-3 bottom-2 text-sm text-SECONDARY hover:text-white hover:underline disabled:opacity-50"
+                  >
+                    Remove
                   </button>
                 </li>
               ))}
             </ul>
+
+            {/* Add Category use case. Not in the Figma frame, added so the use
+                case can be done: type a name, press Add (or Enter). */}
+            <form onSubmit={handleAddCategory} className="flex gap-2">
+              <label htmlFor="new-category" className="sr-only">
+                New category name
+              </label>
+              <input
+                id="new-category"
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+                placeholder="New category name"
+                className="flex-1 min-w-0 h-[42px] px-3 rounded-[7px] bg-white text-xl"
+              />
+              <button
+                type="submit"
+                disabled={busy}
+                className="h-[42px] px-5 rounded-[7px] bg-TERTIARY text-white text-xl font-semibold whitespace-nowrap hover:brightness-110 disabled:opacity-50"
+              >
+                Add Category
+              </button>
+            </form>
+            {/* Result of the last add/remove: green for success, red for errors */}
+            {categoryMessage && (
+              <p className={`px-[5px] text-base font-semibold ${categoryMessage.ok ? "text-green-800" : "text-red-700"}`}>
+                {categoryMessage.text}
+              </p>
+            )}
           </section>
         </div>
 
